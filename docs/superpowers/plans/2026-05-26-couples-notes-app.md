@@ -48,7 +48,7 @@ The working directory is empty except for the `docs/`, `CLAUDE.md` files already
 
 Run:
 ```
-flutter create --project-name couples_notes --org com.couplesnotes --platforms android .
+flutter create --project-name couples_space --org com.couplesnotes --platforms android .
 ```
 
 Expected: project files generated. `flutter create` leaves existing files alone.
@@ -126,7 +126,7 @@ Expected: "Activated flutterfire_cli x.y.z."
 Run: `flutterfire configure`
 - Select the existing Firebase project from the prompt.
 - Select `android` only when asked for platforms.
-- Accept the default package name `com.couplesnotes.couples_notes`.
+- Accept the default package name `com.couplesnotes.couples_space`.
 
 Expected: `lib/firebase_options.dart` is created; `android/app/google-services.json`
 is created; `android/build.gradle` and `android/app/build.gradle` are edited to add the
@@ -207,7 +207,7 @@ Firestore `Timestamp` at the repository boundary (handled in Task 3).
 
 Create `test/features/shared_notes/data/note_test.dart`:
 ```dart
-import 'package:couples_notes/features/shared_notes/data/note.dart';
+import 'package:couples_space/features/shared_notes/data/note.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -234,7 +234,7 @@ void main() {
 - [ ] **Step 2: Run the test to verify it fails**
 
 Run: `flutter test test/features/shared_notes/data/note_test.dart`
-Expected: FAIL — "Target of URI doesn't exist: 'package:couples_notes/features/shared_notes/data/note.dart'".
+Expected: FAIL — "Target of URI doesn't exist: 'package:couples_space/features/shared_notes/data/note.dart'".
 
 - [ ] **Step 3: Implement the Note model**
 
@@ -368,7 +368,7 @@ through repositories.
 Create `test/core/firebase/converters_test.dart`:
 ```dart
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:couples_notes/core/firebase/converters.dart';
+import 'package:couples_space/core/firebase/converters.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -469,8 +469,8 @@ Methods:
 Create `test/features/profile/data/user_repository_test.dart`:
 ```dart
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
-import 'package:couples_notes/features/profile/data/user_profile.dart';
-import 'package:couples_notes/features/profile/data/user_repository.dart';
+import 'package:couples_space/features/profile/data/user_profile.dart';
+import 'package:couples_space/features/profile/data/user_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -616,8 +616,8 @@ Methods:
 Create `test/features/pairing/data/invite_code_repository_test.dart`:
 ```dart
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
-import 'package:couples_notes/features/pairing/data/invite_code.dart';
-import 'package:couples_notes/features/pairing/data/invite_code_repository.dart';
+import 'package:couples_space/features/pairing/data/invite_code.dart';
+import 'package:couples_space/features/pairing/data/invite_code_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -753,11 +753,11 @@ Methods:
 Create `test/features/pairing/data/couple_repository_test.dart`:
 ```dart
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
-import 'package:couples_notes/features/pairing/data/couple_repository.dart';
-import 'package:couples_notes/features/pairing/data/invite_code.dart';
-import 'package:couples_notes/features/pairing/data/invite_code_repository.dart';
-import 'package:couples_notes/features/profile/data/user_profile.dart';
-import 'package:couples_notes/features/profile/data/user_repository.dart';
+import 'package:couples_space/features/pairing/data/couple_repository.dart';
+import 'package:couples_space/features/pairing/data/invite_code.dart';
+import 'package:couples_space/features/pairing/data/invite_code_repository.dart';
+import 'package:couples_space/features/profile/data/user_profile.dart';
+import 'package:couples_space/features/profile/data/user_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -971,7 +971,7 @@ Methods:
 Create `test/features/shared_notes/data/shared_notes_repository_test.dart`:
 ```dart
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
-import 'package:couples_notes/features/shared_notes/data/shared_notes_repository.dart';
+import 'package:couples_space/features/shared_notes/data/shared_notes_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -1155,7 +1155,7 @@ field; for private notes we set `authorId == userId`.
 Create `test/features/private_notes/data/private_notes_repository_test.dart`:
 ```dart
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
-import 'package:couples_notes/features/private_notes/data/private_notes_repository.dart';
+import 'package:couples_space/features/private_notes/data/private_notes_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -1438,8 +1438,8 @@ Create `test/features/auth/data/auth_controller_test.dart`:
 ```dart
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
-import 'package:couples_notes/features/auth/data/auth_controller.dart';
-import 'package:couples_notes/features/profile/data/user_repository.dart';
+import 'package:couples_space/features/auth/data/auth_controller.dart';
+import 'package:couples_space/features/profile/data/user_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

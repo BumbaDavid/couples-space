@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "538976807059",
+    "project_id": "couple-space-1707",
+    "storage_bucket": "couple-space-1707.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:538976807059:android:aed5f6962c35be14414566",
+        "android_client_info": {
+          "package_name": "com.couplesspace.couples_space"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBu_vNiD8LD2rVfzx5MJyFyglhXaV5Sr5k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
