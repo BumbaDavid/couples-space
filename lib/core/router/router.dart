@@ -16,15 +16,16 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     redirect: (context, state) {
       final route = ref.read(authRouteProvider);
+      final path = state.uri.path;
       switch (route) {
         case AuthRoute.loading:
-          return '/loading';
+          return path == '/loading' ? null : '/loading';
         case AuthRoute.signIn:
-          return '/auth';
+          return path == '/auth' ? null : '/auth';
         case AuthRoute.pairing:
-          return '/pairing';
+          return path.startsWith('/pairing') ? null : '/pairing';
         case AuthRoute.home:
-          return '/home';
+          return path.startsWith('/home') ? null : '/home';
       }
     },
     routes: [

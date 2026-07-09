@@ -29,6 +29,14 @@ class CoupleRepository {
     return _col.doc(coupleId).snapshots().map(_decode);
   }
 
+  Stream<Couple?> watchCoupleForUser(String userId) {
+    return _col
+        .where('memberIds', arrayContains: userId)
+        .limit(1)
+        .snapshots()
+        .map((snap) => snap.docs.isEmpty ? null : _decode(snap.docs.first));
+  }
+
   Future<Couple?> findCoupleForUser(String userId) async {
     final query = await _col
         .where('memberIds', arrayContains: userId)

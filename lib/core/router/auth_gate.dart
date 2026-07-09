@@ -26,13 +26,14 @@ final authRouteProvider = Provider<AuthRoute>((ref) {
   );
 });
 
-final coupleBackfillProvider = FutureProvider<String?>((ref) async {
+final coupleBackfillProvider = StreamProvider<String?>((ref) async* {
   final authUser = ref.watch(authStateChangesProvider).asData?.value;
-  if (authUser == null) return null;
+  if (authUser == null) { yield null; return; }
   final couples = ref.watch(coupleRepositoryProvider);
-  final couple = await couples.findCoupleForUser(authUser.uid);
-  if (couple == null) return null;
   final users = ref.watch(userRepositoryProvider);
-  await users.setCoupleId(authUser.uid, couple.id);
-  return couple.id;
+  await for (final couple in couples.watchCoupleForUser(authUser.uid)) {
+    if (couple == null) { yield null; continue; }
+    await users.setCoupleId(authUser.uid, couple.id);
+    yield couple.id;
+  }
 });
