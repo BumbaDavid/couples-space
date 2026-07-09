@@ -1,4 +1,5 @@
 import 'package:couples_space/core/router/auth_gate.dart';
+import 'package:couples_space/core/widgets/home_shell.dart';
 import 'package:couples_space/features/auth/ui/auth_screen.dart';
 import 'package:couples_space/features/pairing/ui/enter_code_screen.dart';
 import 'package:couples_space/features/pairing/ui/generate_code_screen.dart';
@@ -44,7 +45,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      GoRoute(path: '/home', builder: (_, _) => const _HomePlaceholder()),
+      GoRoute(path: '/home', builder: (_, _) => const HomeShell()),
     ],
   );
 });
@@ -74,9 +75,3 @@ class _Loading extends StatelessWidget {
       const Scaffold(body: Center(child: CircularProgressIndicator()));
 }
 
-class _HomePlaceholder extends StatelessWidget {
-  const _HomePlaceholder();
-  @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: Text('Home (TBD task 13)')));
-}

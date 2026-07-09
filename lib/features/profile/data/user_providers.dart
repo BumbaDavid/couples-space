@@ -13,3 +13,8 @@ final currentUserProfileProvider = StreamProvider<UserProfile?>((ref) {
   if (authUser == null) return Stream.value(null);
   return ref.watch(userRepositoryProvider).watchUser(authUser.uid);
 });
+
+final userByIdProvider =
+    StreamProvider.family<UserProfile?, String>((ref, userId) {
+  return ref.watch(userRepositoryProvider).watchUser(userId);
+});
