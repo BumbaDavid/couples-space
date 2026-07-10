@@ -18,6 +18,7 @@ screens, state management, and security rules in detail.
 - **Riverpod** for state management (`flutter_riverpod` + `riverpod_annotation`).
 - **go_router** for routing.
 - **freezed** + **json_serializable** for immutable data classes.
+- **google_fonts** for Baloo 2 (headings) and Quicksand (body/labels).
 
 ## Project layout (feature-first)
 
@@ -74,13 +75,28 @@ Specifically:
 - **Auto-save:** the note editor auto-saves on back-navigation. If both title and body
   are empty, the note is discarded instead of saved.
 - **Deletes are hard deletes** with a confirmation dialog. No soft-delete, no undo in V1.
+- **Colors and shadows:** never use raw hex values in UI code. Use `AppColors.*` for
+  colors, `AppTheme.cardShadow` / `AppTheme.buttonShadow` for shadows, and
+  `AppColors.tilePalette[i % 5]` for exercise icon tile colors. Design tokens live in
+  `lib/core/theme/theme.dart`.
 
 ## Testing
 
+- Only write tests when explicitly asked — never as an automatic byproduct of a code change.
 - Unit-test repositories with `fake_cloud_firestore`.
 - Firestore-rules tests via the Firebase emulator — at least one allow and one deny case
   per `match` block.
 - Manual smoke testing on a real Android device covers the rest. No widget tests in V1.
+
+## Claude behavior
+
+- **No subagents:** Solve tasks using the main agent only. Do not spawn subagents or
+  parallel agents unless explicitly asked.
+- **No auto-generated tests:** Never write tests as part of a code change unless
+  explicitly asked. The Testing section describes how to write them when requested.
+- **Obsidian vault:** Before adding anything to `docs/vault/`, ask first.
+- **Git:** Never commit or push to GitHub unless explicitly asked. Fetching and pulling
+  to compare is fine.
 
 ## Things deferred to post-V1 — do not add them speculatively
 
@@ -90,6 +106,11 @@ Specifically:
 
 If a task seems to require one of these, ask first — it likely means scope has expanded
 beyond V1.
+
+## Maintenance
+
+Keep this file up to date as the project evolves. Update it when conventions change,
+new patterns are established, scope shifts, or new tooling is added.
 
 ## Useful commands
 
