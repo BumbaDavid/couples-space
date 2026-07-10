@@ -22,7 +22,7 @@ Map<String, dynamic> timestampsToDateTimes(
   for (final field in dateTimeFields) {
     final value = result[field];
     if (value is Timestamp) {
-      result[field] = value.toDate().toUtc().toIso8601String();
+      result[field] = value.toDate().toLocal().toIso8601String();
     }
   }
   return result;

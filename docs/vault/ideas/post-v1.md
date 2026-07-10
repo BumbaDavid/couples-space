@@ -35,3 +35,13 @@ Things deliberately left out of V1. Don't add these speculatively — pick one u
 ## Accent color / font customization
 - Per-user color seed stored in `users/{userId}.accentColor`.
 - Already has a `themeMode` field — accent color would extend this.
+
+## Workout history pagination
+
+Currently all entries for an exercise are loaded at once via a Firestore stream and rendered in a `SingleChildScrollView`. Flutter handles this fine until you get into the hundreds of items.
+
+If it becomes a problem, two options:
+- **Limit the stream:** add `.limit(50)` to the Firestore query in `WorkoutRepository.watchEntries` — shows only the 50 most recent entries.
+- **Lazy rendering:** switch `_History` in `exercise_detail_screen.dart` from a `Column` to a `ListView.builder` — no Firestore change needed, just defers widget creation until rows scroll into view.
+
+No reason to add this complexity in V1.

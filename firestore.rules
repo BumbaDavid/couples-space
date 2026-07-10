@@ -38,6 +38,14 @@ service cloud.firestore {
       allow read, write: if isSelf(userId);
     }
 
+    match /users/{userId}/exercises/{exerciseId} {
+      allow read, write: if isSelf(userId);
+    }
+
+    match /users/{userId}/exercises/{exerciseId}/entries/{entryId} {
+      allow read, write: if isSelf(userId);
+    }
+
     match /inviteCodes/{code} {
       allow read: if isSignedIn();
       allow create: if isSignedIn()
