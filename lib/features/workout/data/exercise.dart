@@ -11,6 +11,7 @@ abstract class Exercise with _$Exercise {
     required String bodyPart,
     @Default(false) bool isArchived,
     required DateTime createdAt,
+    @Default([]) List<String> dayIds,
   }) = _Exercise;
 
   factory Exercise.fromJson(Map<String, dynamic> json) =>

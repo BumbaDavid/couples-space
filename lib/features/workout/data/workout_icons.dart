@@ -8,8 +8,11 @@ abstract class WorkoutIcons {
     'Shoulders',
     'Arms',
     'Core',
-    'Cardio',
+    'Endurance',
   ];
+
+  static bool isEndurance(String bodyPart) =>
+      bodyPart == 'Endurance' || bodyPart == 'Cardio';
 
   static IconData forBodyPart(String bodyPart) => switch (bodyPart) {
         'Chest' => Icons.fitness_center,
@@ -18,7 +21,7 @@ abstract class WorkoutIcons {
         'Shoulders' => Icons.sports_gymnastics,
         'Arms' => Icons.sports_handball,
         'Core' => Icons.self_improvement,
-        'Cardio' => Icons.directions_bike,
+        'Endurance' => Icons.timer,
         _ => Icons.fitness_center,
       };
 }

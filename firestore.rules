@@ -46,6 +46,10 @@ service cloud.firestore {
       allow read, write: if isSelf(userId);
     }
 
+    match /users/{userId}/days/{dayId} {
+      allow read, write: if isSelf(userId);
+    }
+
     match /inviteCodes/{code} {
       allow read: if isSignedIn();
       allow create: if isSignedIn()

@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$WorkoutEntry {
 
- String get id; String get exerciseId; List<WorkoutSet> get sets; DateTime get date;
+ String get id; String get exerciseId; List<WorkoutSet> get sets; DateTime get date;// endurance fields (null for strength entries)
+ int? get durationMinutes; double? get distanceKm; double? get speed; int? get resistance;
 /// Create a copy of WorkoutEntry
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +29,16 @@ $WorkoutEntryCopyWith<WorkoutEntry> get copyWith => _$WorkoutEntryCopyWithImpl<W
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is WorkoutEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.exerciseId, exerciseId) || other.exerciseId == exerciseId)&&const DeepCollectionEquality().equals(other.sets, sets)&&(identical(other.date, date) || other.date == date));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is WorkoutEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.exerciseId, exerciseId) || other.exerciseId == exerciseId)&&const DeepCollectionEquality().equals(other.sets, sets)&&(identical(other.date, date) || other.date == date)&&(identical(other.durationMinutes, durationMinutes) || other.durationMinutes == durationMinutes)&&(identical(other.distanceKm, distanceKm) || other.distanceKm == distanceKm)&&(identical(other.speed, speed) || other.speed == speed)&&(identical(other.resistance, resistance) || other.resistance == resistance));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,exerciseId,const DeepCollectionEquality().hash(sets),date);
+int get hashCode => Object.hash(runtimeType,id,exerciseId,const DeepCollectionEquality().hash(sets),date,durationMinutes,distanceKm,speed,resistance);
 
 @override
 String toString() {
-  return 'WorkoutEntry(id: $id, exerciseId: $exerciseId, sets: $sets, date: $date)';
+  return 'WorkoutEntry(id: $id, exerciseId: $exerciseId, sets: $sets, date: $date, durationMinutes: $durationMinutes, distanceKm: $distanceKm, speed: $speed, resistance: $resistance)';
 }
 
 
@@ -48,7 +49,7 @@ abstract mixin class $WorkoutEntryCopyWith<$Res>  {
   factory $WorkoutEntryCopyWith(WorkoutEntry value, $Res Function(WorkoutEntry) _then) = _$WorkoutEntryCopyWithImpl;
 @useResult
 $Res call({
- String id, String exerciseId, List<WorkoutSet> sets, DateTime date
+ String id, String exerciseId, List<WorkoutSet> sets, DateTime date, int? durationMinutes, double? distanceKm, double? speed, int? resistance
 });
 
 
@@ -65,13 +66,17 @@ class _$WorkoutEntryCopyWithImpl<$Res>
 
 /// Create a copy of WorkoutEntry
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? exerciseId = null,Object? sets = null,Object? date = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? exerciseId = null,Object? sets = null,Object? date = null,Object? durationMinutes = freezed,Object? distanceKm = freezed,Object? speed = freezed,Object? resistance = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,exerciseId: null == exerciseId ? _self.exerciseId : exerciseId // ignore: cast_nullable_to_non_nullable
 as String,sets: null == sets ? _self.sets : sets // ignore: cast_nullable_to_non_nullable
 as List<WorkoutSet>,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,durationMinutes: freezed == durationMinutes ? _self.durationMinutes : durationMinutes // ignore: cast_nullable_to_non_nullable
+as int?,distanceKm: freezed == distanceKm ? _self.distanceKm : distanceKm // ignore: cast_nullable_to_non_nullable
+as double?,speed: freezed == speed ? _self.speed : speed // ignore: cast_nullable_to_non_nullable
+as double?,resistance: freezed == resistance ? _self.resistance : resistance // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -156,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String exerciseId,  List<WorkoutSet> sets,  DateTime date)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String exerciseId,  List<WorkoutSet> sets,  DateTime date,  int? durationMinutes,  double? distanceKm,  double? speed,  int? resistance)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WorkoutEntry() when $default != null:
-return $default(_that.id,_that.exerciseId,_that.sets,_that.date);case _:
+return $default(_that.id,_that.exerciseId,_that.sets,_that.date,_that.durationMinutes,_that.distanceKm,_that.speed,_that.resistance);case _:
   return orElse();
 
 }
@@ -177,10 +182,10 @@ return $default(_that.id,_that.exerciseId,_that.sets,_that.date);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String exerciseId,  List<WorkoutSet> sets,  DateTime date)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String exerciseId,  List<WorkoutSet> sets,  DateTime date,  int? durationMinutes,  double? distanceKm,  double? speed,  int? resistance)  $default,) {final _that = this;
 switch (_that) {
 case _WorkoutEntry():
-return $default(_that.id,_that.exerciseId,_that.sets,_that.date);case _:
+return $default(_that.id,_that.exerciseId,_that.sets,_that.date,_that.durationMinutes,_that.distanceKm,_that.speed,_that.resistance);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +202,10 @@ return $default(_that.id,_that.exerciseId,_that.sets,_that.date);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String exerciseId,  List<WorkoutSet> sets,  DateTime date)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String exerciseId,  List<WorkoutSet> sets,  DateTime date,  int? durationMinutes,  double? distanceKm,  double? speed,  int? resistance)?  $default,) {final _that = this;
 switch (_that) {
 case _WorkoutEntry() when $default != null:
-return $default(_that.id,_that.exerciseId,_that.sets,_that.date);case _:
+return $default(_that.id,_that.exerciseId,_that.sets,_that.date,_that.durationMinutes,_that.distanceKm,_that.speed,_that.resistance);case _:
   return null;
 
 }
@@ -212,19 +217,24 @@ return $default(_that.id,_that.exerciseId,_that.sets,_that.date);case _:
 @JsonSerializable()
 
 class _WorkoutEntry implements WorkoutEntry {
-  const _WorkoutEntry({required this.id, required this.exerciseId, required final  List<WorkoutSet> sets, required this.date}): _sets = sets;
+  const _WorkoutEntry({required this.id, required this.exerciseId, final  List<WorkoutSet> sets = const [], required this.date, this.durationMinutes, this.distanceKm, this.speed, this.resistance}): _sets = sets;
   factory _WorkoutEntry.fromJson(Map<String, dynamic> json) => _$WorkoutEntryFromJson(json);
 
 @override final  String id;
 @override final  String exerciseId;
  final  List<WorkoutSet> _sets;
-@override List<WorkoutSet> get sets {
+@override@JsonKey() List<WorkoutSet> get sets {
   if (_sets is EqualUnmodifiableListView) return _sets;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_sets);
 }
 
 @override final  DateTime date;
+// endurance fields (null for strength entries)
+@override final  int? durationMinutes;
+@override final  double? distanceKm;
+@override final  double? speed;
+@override final  int? resistance;
 
 /// Create a copy of WorkoutEntry
 /// with the given fields replaced by the non-null parameter values.
@@ -239,16 +249,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _WorkoutEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.exerciseId, exerciseId) || other.exerciseId == exerciseId)&&const DeepCollectionEquality().equals(other._sets, _sets)&&(identical(other.date, date) || other.date == date));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _WorkoutEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.exerciseId, exerciseId) || other.exerciseId == exerciseId)&&const DeepCollectionEquality().equals(other._sets, _sets)&&(identical(other.date, date) || other.date == date)&&(identical(other.durationMinutes, durationMinutes) || other.durationMinutes == durationMinutes)&&(identical(other.distanceKm, distanceKm) || other.distanceKm == distanceKm)&&(identical(other.speed, speed) || other.speed == speed)&&(identical(other.resistance, resistance) || other.resistance == resistance));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,exerciseId,const DeepCollectionEquality().hash(_sets),date);
+int get hashCode => Object.hash(runtimeType,id,exerciseId,const DeepCollectionEquality().hash(_sets),date,durationMinutes,distanceKm,speed,resistance);
 
 @override
 String toString() {
-  return 'WorkoutEntry(id: $id, exerciseId: $exerciseId, sets: $sets, date: $date)';
+  return 'WorkoutEntry(id: $id, exerciseId: $exerciseId, sets: $sets, date: $date, durationMinutes: $durationMinutes, distanceKm: $distanceKm, speed: $speed, resistance: $resistance)';
 }
 
 
@@ -259,7 +269,7 @@ abstract mixin class _$WorkoutEntryCopyWith<$Res> implements $WorkoutEntryCopyWi
   factory _$WorkoutEntryCopyWith(_WorkoutEntry value, $Res Function(_WorkoutEntry) _then) = __$WorkoutEntryCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String exerciseId, List<WorkoutSet> sets, DateTime date
+ String id, String exerciseId, List<WorkoutSet> sets, DateTime date, int? durationMinutes, double? distanceKm, double? speed, int? resistance
 });
 
 
@@ -276,13 +286,17 @@ class __$WorkoutEntryCopyWithImpl<$Res>
 
 /// Create a copy of WorkoutEntry
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? exerciseId = null,Object? sets = null,Object? date = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? exerciseId = null,Object? sets = null,Object? date = null,Object? durationMinutes = freezed,Object? distanceKm = freezed,Object? speed = freezed,Object? resistance = freezed,}) {
   return _then(_WorkoutEntry(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,exerciseId: null == exerciseId ? _self.exerciseId : exerciseId // ignore: cast_nullable_to_non_nullable
 as String,sets: null == sets ? _self._sets : sets // ignore: cast_nullable_to_non_nullable
 as List<WorkoutSet>,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,durationMinutes: freezed == durationMinutes ? _self.durationMinutes : durationMinutes // ignore: cast_nullable_to_non_nullable
+as int?,distanceKm: freezed == distanceKm ? _self.distanceKm : distanceKm // ignore: cast_nullable_to_non_nullable
+as double?,speed: freezed == speed ? _self.speed : speed // ignore: cast_nullable_to_non_nullable
+as double?,resistance: freezed == resistance ? _self.resistance : resistance // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

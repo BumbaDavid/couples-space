@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/theme.dart';
+import '../data/workout_entry.dart';
+import '../data/workout_icons.dart';
 import '../data/workout_set.dart';
 import '../providers/workout_providers.dart';
 
@@ -12,30 +14,48 @@ class AddEntryScreen extends ConsumerStatefulWidget {
     super.key,
     required this.exerciseId,
     required this.exerciseName,
+    required this.bodyPart,
   });
   final String exerciseId;
   final String exerciseName;
+  final String bodyPart;
 
   @override
   ConsumerState<AddEntryScreen> createState() => _AddEntryScreenState();
 }
 
 class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
+  // strength
   int _reps = 10;
   final _weightController = TextEditingController();
-  bool _failure = false;
   final List<WorkoutSet> _sets = [];
+
+  // endurance
+  int _durationMinutes = 20;
+  final _distanceController = TextEditingController();
+  final _speedController = TextEditingController();
+  final _resistanceController = TextEditingController();
+
+  // strength
+  bool _failure = false;
+
   bool _saving = false;
+
+  bool get _isEndurance => WorkoutIcons.isEndurance(widget.bodyPart);
 
   @override
   void dispose() {
     _weightController.dispose();
+    _distanceController.dispose();
+    _speedController.dispose();
+    _resistanceController.dispose();
     super.dispose();
   }
 
   void _addSet() {
-    final weightText = _weightController.text.trim();
-    final weight = weightText.isEmpty ? null : double.tryParse(weightText);
+    final weight = _weightController.text.trim().isEmpty
+        ? null
+        : double.tryParse(_weightController.text.trim());
     setState(() {
       _sets.add(WorkoutSet(reps: _reps, weight: weight, failure: _failure));
       _reps = 10;
@@ -44,13 +64,34 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     });
   }
 
-  Future<void> _save() async {
+  Future<void> _saveStrength() async {
     if (_saving || _sets.isEmpty) return;
     setState(() => _saving = true);
     try {
       await ref.read(workoutRepositoryProvider).createEntry(
             exerciseId: widget.exerciseId,
             sets: _sets,
+          );
+      if (mounted) Navigator.of(context).pop();
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _saveEndurance() async {
+    if (_saving) return;
+    setState(() => _saving = true);
+    try {
+      double? parseDouble(String t) =>
+          t.trim().isEmpty ? null : double.tryParse(t.trim());
+      int? parseInt(String t) =>
+          t.trim().isEmpty ? null : int.tryParse(t.trim());
+      await ref.read(workoutRepositoryProvider).createEntry(
+            exerciseId: widget.exerciseId,
+            durationMinutes: _durationMinutes,
+            distanceKm: parseDouble(_distanceController.text),
+            speed: parseDouble(_speedController.text),
+            resistance: parseInt(_resistanceController.text),
           );
       if (mounted) Navigator.of(context).pop();
     } finally {
@@ -90,7 +131,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Log a set',
+                          _isEndurance ? 'Log a session' : 'Log a set',
                           style: GoogleFonts.baloo2(
                             fontSize: 28,
                             fontWeight: FontWeight.w600,
@@ -98,120 +139,157 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        if (_sets.isNotEmpty) ...[
-                          Text(
-                            'Sets logged',
-                            style: GoogleFonts.baloo2(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.text,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          ..._sets.asMap().entries.map((e) => Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: _SetChip(index: e.key, set: e.value),
-                              )),
-                          const SizedBox(height: 16),
-                        ],
-                        _StepperCard(
-                          label: 'REPS',
-                          value: _reps,
-                          onDecrement: _reps > 1
-                              ? () => setState(() => _reps--)
-                              : null,
-                          onIncrement: () => setState(() => _reps++),
-                        ),
-                        const SizedBox(height: 14),
-                        _WeightCard(controller: _weightController),
-                        const SizedBox(height: 14),
-                        _FailureCard(
-                          value: _failure,
-                          onChanged: (v) => setState(() => _failure = v),
-                        ),
-                        const SizedBox(height: 20),
-                        GestureDetector(
-                          onTap: _addSet,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            decoration: BoxDecoration(
-                              color: AppColors.chipBg,
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: Center(
-                              child: Text(
-                                'Add set',
-                                style: GoogleFonts.baloo2(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.chipText,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                        if (_isEndurance)
+                          _buildEnduranceForm()
+                        else
+                          _buildStrengthForm(),
                       ],
                     ),
                   ),
                 ),
               ],
             ),
-            // Bottom button overlay
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      AppColors.bg.withValues(alpha: 0),
-                      AppColors.bg,
-                    ],
-                  ),
-                ),
-                padding: const EdgeInsets.fromLTRB(22, 16, 22, 20),
-                child: GestureDetector(
-                  onTap: _sets.isEmpty || _saving ? null : _save,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    decoration: BoxDecoration(
-                      color:
-                          _sets.isEmpty ? AppColors.border : AppColors.primary,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: _sets.isEmpty
-                          ? null
-                          : const [AppTheme.buttonShadow],
-                    ),
-                    child: Center(
-                      child: _saving
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                  color: AppColors.onPrimary, strokeWidth: 2),
-                            )
-                          : Text(
-                              _sets.isEmpty
-                                  ? 'Add at least one set'
-                                  : 'Save entry (${_sets.length} set${_sets.length == 1 ? '' : 's'})',
-                              style: GoogleFonts.baloo2(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                                color: _sets.isEmpty
-                                    ? AppColors.muted
-                                    : AppColors.onPrimary,
-                              ),
-                            ),
-                    ),
-                  ),
+              child: _buildSaveButton(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStrengthForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_sets.isNotEmpty) ...[
+          Text(
+            'Sets logged',
+            style: GoogleFonts.baloo2(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.text,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ..._sets.asMap().entries.map((e) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _SetChip(index: e.key, set: e.value),
+              )),
+          const SizedBox(height: 16),
+        ],
+        _StepperCard(
+          label: 'REPS',
+          value: _reps,
+          onDecrement: _reps > 1 ? () => setState(() => _reps--) : null,
+          onIncrement: () => setState(() => _reps++),
+        ),
+        const SizedBox(height: 14),
+        _WeightCard(controller: _weightController),
+        const SizedBox(height: 14),
+        _FailureCard(
+          subtitle: 'Last set with nothing left',
+          value: _failure,
+          onChanged: (v) => setState(() => _failure = v),
+        ),
+        const SizedBox(height: 20),
+        GestureDetector(
+          onTap: _addSet,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: AppColors.chipBg,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Center(
+              child: Text(
+                'Add set',
+                style: GoogleFonts.baloo2(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.chipText,
                 ),
               ),
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEnduranceForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _StepperCard(
+          label: 'DURATION (MINUTES)',
+          value: _durationMinutes,
+          onDecrement:
+              _durationMinutes > 1 ? () => setState(() => _durationMinutes--) : null,
+          onIncrement: () => setState(() => _durationMinutes++),
+        ),
+        const SizedBox(height: 14),
+        _DistanceCard(controller: _distanceController),
+        const SizedBox(height: 14),
+        _SpeedCard(controller: _speedController),
+        const SizedBox(height: 14),
+        _ResistanceCard(controller: _resistanceController),
+      ],
+    );
+  }
+
+  Widget _buildSaveButton() {
+    final ready = _isEndurance || _sets.isNotEmpty;
+    final label = _isEndurance
+        ? 'Save session (${formatDuration(_durationMinutes)})'
+        : _sets.isEmpty
+            ? 'Add at least one set'
+            : 'Save entry (${_sets.length} set${_sets.length == 1 ? '' : 's'})';
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.bg.withValues(alpha: 0),
+            AppColors.bg,
           ],
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(22, 16, 22, 20),
+      child: GestureDetector(
+        onTap: (!ready || _saving)
+            ? null
+            : (_isEndurance ? _saveEndurance : _saveStrength),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            color: ready ? AppColors.primary : AppColors.border,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: ready ? const [AppTheme.buttonShadow] : null,
+          ),
+          child: Center(
+            child: _saving
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                        color: AppColors.onPrimary, strokeWidth: 2),
+                  )
+                : Text(
+                    label,
+                    style: GoogleFonts.baloo2(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: ready ? AppColors.onPrimary : AppColors.muted,
+                    ),
+                  ),
+          ),
         ),
       ),
     );
@@ -366,6 +444,58 @@ class _WeightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return _NumericInputCard(
+      label: 'WEIGHT (KG) — OPTIONAL',
+      controller: controller,
+      suffix: 'kg',
+    );
+  }
+}
+
+// ── Distance card ──────────────────────────────────────────────────────────
+
+class _DistanceCard extends StatelessWidget {
+  const _DistanceCard({required this.controller});
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return _NumericInputCard(
+      label: 'DISTANCE (KM) — OPTIONAL',
+      controller: controller,
+      suffix: 'km',
+    );
+  }
+}
+
+// ── Speed card ─────────────────────────────────────────────────────────────
+
+class _SpeedCard extends StatelessWidget {
+  const _SpeedCard({required this.controller});
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return _NumericInputCard(
+      label: 'SPEED (KM/H) — OPTIONAL',
+      controller: controller,
+      suffix: 'km/h',
+    );
+  }
+}
+
+class _NumericInputCard extends StatelessWidget {
+  const _NumericInputCard({
+    required this.label,
+    required this.controller,
+    required this.suffix,
+  });
+  final String label;
+  final TextEditingController controller;
+  final String suffix;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -377,7 +507,7 @@ class _WeightCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'WEIGHT (KG) — OPTIONAL',
+            label,
             style: GoogleFonts.quicksand(
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
@@ -404,7 +534,63 @@ class _WeightCard extends StatelessWidget {
                   color: AppColors.border),
               border: InputBorder.none,
               contentPadding: EdgeInsets.zero,
-              suffixText: 'kg',
+              suffixText: suffix,
+              suffixStyle: GoogleFonts.quicksand(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.muted),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Resistance card ────────────────────────────────────────────────────────
+
+class _ResistanceCard extends StatelessWidget {
+  const _ResistanceCard({required this.controller});
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: const [AppTheme.cardShadow],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'RESISTANCE — OPTIONAL',
+            style: GoogleFonts.quicksand(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: AppColors.muted,
+                letterSpacing: 1.2),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            style: GoogleFonts.baloo2(
+                fontSize: 32,
+                fontWeight: FontWeight.w700,
+                color: AppColors.text),
+            decoration: InputDecoration(
+              hintText: '—',
+              hintStyle: GoogleFonts.baloo2(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.border),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.zero,
+              suffixText: 'level',
               suffixStyle: GoogleFonts.quicksand(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -420,9 +606,14 @@ class _WeightCard extends StatelessWidget {
 // ── Failure toggle card ────────────────────────────────────────────────────
 
 class _FailureCard extends StatelessWidget {
-  const _FailureCard({required this.value, required this.onChanged});
+  const _FailureCard({
+    required this.value,
+    required this.onChanged,
+    required this.subtitle,
+  });
   final bool value;
   final ValueChanged<bool> onChanged;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -449,7 +640,7 @@ class _FailureCard extends StatelessWidget {
                         color: AppColors.text),
                   ),
                   Text(
-                    'Last set with nothing left',
+                    subtitle,
                     style: GoogleFonts.quicksand(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,

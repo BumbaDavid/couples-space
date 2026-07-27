@@ -35,6 +35,11 @@ class ExerciseDetailScreen extends ConsumerWidget {
         final tile =
             AppColors.tilePalette[tileIndex % AppColors.tilePalette.length];
         final entries = entriesAsync.asData?.value ?? [];
+        final days = ref.watch(daysProvider).asData?.value ?? [];
+        final exerciseDays = days
+            .where((d) => exercise.dayIds.contains(d.id))
+            .toList();
+        final isEndurance = WorkoutIcons.isEndurance(exercise.bodyPart);
 
         return Scaffold(
           body: SafeArea(
@@ -79,32 +84,35 @@ class ExerciseDetailScreen extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: AppColors.chipBg,
-                                borderRadius: BorderRadius.circular(100),
-                              ),
-                              child: Text(
-                                exercise.bodyPart,
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.chipText,
-                                ),
-                              ),
+                            Wrap(
+                              alignment: WrapAlignment.center,
+                              spacing: 7,
+                              runSpacing: 7,
+                              children: [
+                                _InfoChip(label: exercise.bodyPart),
+                                for (final d in exerciseDays)
+                                  _InfoChip(
+                                    icon: Icons.calendar_today,
+                                    label: d.name,
+                                  ),
+                              ],
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 22),
-                      _StatRow(entries: entries),
+                      isEndurance
+                          ? _EnduranceStatRow(entries: entries)
+                          : _StrengthStatRow(entries: entries),
                       const SizedBox(height: 16),
-                      if (entries.isNotEmpty) _VolumeChart(entries: entries),
+                      if (entries.isNotEmpty)
+                        isEndurance
+                            ? _DurationChart(entries: entries)
+                            : _VolumeChart(entries: entries),
                       _History(
                         entries: entries,
                         exerciseId: exerciseId,
+                        isEndurance: isEndurance,
                       ),
                     ],
                   ),
@@ -116,6 +124,7 @@ class ExerciseDetailScreen extends ConsumerWidget {
                   child: _AddEntryButton(
                     exerciseId: exerciseId,
                     exerciseName: exercise.name,
+                    bodyPart: exercise.bodyPart,
                   ),
                 ),
               ],
@@ -127,18 +136,19 @@ class ExerciseDetailScreen extends ConsumerWidget {
   }
 }
 
-// ── Stat row ───────────────────────────────────────────────────────────────
+// ── Strength stat row ──────────────────────────────────────────────────────
 
-class _StatRow extends StatelessWidget {
-  const _StatRow({required this.entries});
+class _StrengthStatRow extends StatelessWidget {
+  const _StrengthStatRow({required this.entries});
   final List<WorkoutEntry> entries;
 
   @override
   Widget build(BuildContext context) {
     final sessions = entries.length;
     final allSets = entries.expand((e) => e.sets).toList();
-    final bestReps =
-        allSets.isEmpty ? 0 : allSets.map((s) => s.reps).reduce((a, b) => a > b ? a : b);
+    final bestReps = allSets.isEmpty
+        ? 0
+        : allSets.map((s) => s.reps).reduce((a, b) => a > b ? a : b);
     final totalSets = entries.fold<int>(0, (sum, e) => sum + e.sets.length);
 
     return Row(
@@ -148,6 +158,36 @@ class _StatRow extends StatelessWidget {
         _StatCard(value: '$bestReps', label: 'BEST REPS'),
         const SizedBox(width: 10),
         _StatCard(value: '$totalSets', label: 'TOTAL SETS'),
+      ],
+    );
+  }
+}
+
+// ── Endurance stat row ─────────────────────────────────────────────────────
+
+class _EnduranceStatRow extends StatelessWidget {
+  const _EnduranceStatRow({required this.entries});
+  final List<WorkoutEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    final sessions = entries.length;
+    final durations =
+        entries.map((e) => e.durationMinutes ?? 0).where((d) => d > 0).toList();
+    final bestTime = durations.isEmpty ? 0 : durations.reduce((a, b) => a > b ? a : b);
+    final totalTime = durations.fold<int>(0, (s, d) => s + d);
+
+    return Row(
+      children: [
+        _StatCard(value: '$sessions', label: 'SESSIONS'),
+        const SizedBox(width: 10),
+        _StatCard(
+            value: bestTime == 0 ? '—' : formatDuration(bestTime),
+            label: 'BEST TIME'),
+        const SizedBox(width: 10),
+        _StatCard(
+            value: totalTime == 0 ? '—' : formatDuration(totalTime),
+            label: 'TOTAL TIME'),
       ],
     );
   }
@@ -191,7 +231,7 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ── Volume chart ───────────────────────────────────────────────────────────
+// ── Volume chart (strength) ────────────────────────────────────────────────
 
 class _VolumeChart extends StatelessWidget {
   const _VolumeChart({required this.entries});
@@ -202,6 +242,52 @@ class _VolumeChart extends StatelessWidget {
     final volumes = entries.map((e) => e.volume).toList();
     final maxVol = volumes.reduce((a, b) => a > b ? a : b);
 
+    return _ChartCard(
+      title: 'Volume per session',
+      entries: entries,
+      barHeight: (entry) {
+        final frac = maxVol > 0 ? entry.volume / maxVol : 0.0;
+        return (frac * 100).clamp(6.0, 100.0);
+      },
+    );
+  }
+}
+
+// ── Duration chart (endurance) ─────────────────────────────────────────────
+
+class _DurationChart extends StatelessWidget {
+  const _DurationChart({required this.entries});
+  final List<WorkoutEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    final durations = entries.map((e) => e.durationMinutes ?? 0).toList();
+    final maxDur =
+        durations.reduce((a, b) => a > b ? a : b).toDouble();
+
+    return _ChartCard(
+      title: 'Duration per session',
+      entries: entries,
+      barHeight: (entry) {
+        final frac = maxDur > 0 ? (entry.durationMinutes ?? 0) / maxDur : 0.0;
+        return (frac * 100).clamp(6.0, 100.0);
+      },
+    );
+  }
+}
+
+class _ChartCard extends StatelessWidget {
+  const _ChartCard({
+    required this.title,
+    required this.entries,
+    required this.barHeight,
+  });
+  final String title;
+  final List<WorkoutEntry> entries;
+  final double Function(WorkoutEntry) barHeight;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(18),
@@ -214,7 +300,7 @@ class _VolumeChart extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Volume per session',
+            title,
             style: GoogleFonts.baloo2(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -225,10 +311,7 @@ class _VolumeChart extends StatelessWidget {
             height: 120,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: entries.asMap().entries.map((e) {
-                final vol = e.value.volume;
-                final frac = maxVol > 0 ? vol / maxVol : 0.0;
-                final barH = (frac * 100).clamp(6.0, 100.0);
+              children: entries.map((entry) {
                 return Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -236,7 +319,7 @@ class _VolumeChart extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Container(
-                          height: barH,
+                          height: barHeight(entry),
                           decoration: const BoxDecoration(
                             color: AppColors.primary,
                             borderRadius: BorderRadius.only(
@@ -249,7 +332,7 @@ class _VolumeChart extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          formatEntryDate(e.value.date),
+                          formatEntryDate(entry.date),
                           style: GoogleFonts.quicksand(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
@@ -273,9 +356,14 @@ class _VolumeChart extends StatelessWidget {
 // ── History ────────────────────────────────────────────────────────────────
 
 class _History extends ConsumerWidget {
-  const _History({required this.entries, required this.exerciseId});
+  const _History({
+    required this.entries,
+    required this.exerciseId,
+    required this.isEndurance,
+  });
   final List<WorkoutEntry> entries;
   final String exerciseId;
+  final bool isEndurance;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -301,7 +389,9 @@ class _History extends ConsumerWidget {
                   const Icon(Icons.note_add, color: AppColors.muted, size: 38),
                   const SizedBox(height: 8),
                   Text(
-                    'No entries yet — log your first set!',
+                    isEndurance
+                        ? 'No sessions yet — log your first!'
+                        : 'No entries yet — log your first set!',
                     style: GoogleFonts.quicksand(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -312,17 +402,19 @@ class _History extends ConsumerWidget {
             ),
           )
         else
-          ...entries.map((entry) => _EntryRow(
-                entry: entry,
-                exerciseId: exerciseId,
-              )),
+          ...entries.map((entry) => isEndurance
+              ? _EnduranceEntryRow(entry: entry, exerciseId: exerciseId)
+              : _StrengthEntryRow(entry: entry, exerciseId: exerciseId)),
       ],
     );
   }
 }
 
-class _EntryRow extends ConsumerWidget {
-  const _EntryRow({required this.entry, required this.exerciseId});
+// ── Strength entry row ─────────────────────────────────────────────────────
+
+class _StrengthEntryRow extends ConsumerWidget {
+  const _StrengthEntryRow(
+      {required this.entry, required this.exerciseId});
   final WorkoutEntry entry;
   final String exerciseId;
 
@@ -338,30 +430,8 @@ class _EntryRow extends ConsumerWidget {
       child: Dismissible(
         key: Key(entry.id),
         direction: DismissDirection.endToStart,
-        background: Container(
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 20),
-          decoration: BoxDecoration(
-            color: AppColors.failText,
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: const Icon(Icons.delete, color: Colors.white),
-        ),
-        confirmDismiss: (_) => showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Delete entry?'),
-            content: const Text('This cannot be undone.'),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancel')),
-              TextButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  child: const Text('Delete')),
-            ],
-          ),
-        ),
+        background: _deleteBackground(),
+        confirmDismiss: (_) => _confirmDelete(context),
         onDismissed: (_) => ref
             .read(workoutRepositoryProvider)
             .deleteEntry(exerciseId, entry.id),
@@ -374,24 +444,7 @@ class _EntryRow extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: AppColors.chipBg,
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Center(
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.baloo2(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.text),
-                  ),
-                ),
-              ),
+              _DateTile(label: label),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -406,7 +459,8 @@ class _EntryRow extends ConsumerWidget {
                     ),
                     Text(
                       entry.sets.map((s) {
-                        final w = s.weight != null ? ' × ${s.weight}kg' : '';
+                        final w =
+                            s.weight != null ? ' × ${s.weight}kg' : '';
                         return '${s.reps}$w';
                       }).join(', '),
                       style: GoogleFonts.quicksand(
@@ -421,33 +475,201 @@ class _EntryRow extends ConsumerWidget {
               ),
               if (hasFailure) ...[
                 const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: AppColors.failBg,
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.local_fire_department,
-                          size: 14, color: AppColors.failText),
-                      const SizedBox(width: 3),
-                      Text(
-                        'Failure',
-                        style: GoogleFonts.quicksand(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.failText),
-                      ),
-                    ],
-                  ),
-                ),
+                _FailureBadge(),
               ],
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ── Endurance entry row ────────────────────────────────────────────────────
+
+class _EnduranceEntryRow extends ConsumerWidget {
+  const _EnduranceEntryRow(
+      {required this.entry, required this.exerciseId});
+  final WorkoutEntry entry;
+  final String exerciseId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final label = formatEntryDate(entry.date);
+    final duration = entry.durationMinutes ?? 0;
+
+    final details = [
+      if (entry.distanceKm != null) '${entry.distanceKm}km',
+      if (entry.speed != null) '${entry.speed}km/h',
+      if (entry.resistance != null) 'R${entry.resistance}',
+    ].join(' · ');
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Dismissible(
+        key: Key(entry.id),
+        direction: DismissDirection.endToStart,
+        background: _deleteBackground(),
+        confirmDismiss: (_) => _confirmDelete(context),
+        onDismissed: (_) => ref
+            .read(workoutRepositoryProvider)
+            .deleteEntry(exerciseId, entry.id),
+        child: Container(
+          padding:
+              const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: const [AppTheme.cardShadow],
+          ),
+          child: Row(
+            children: [
+              _DateTile(label: label),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      formatDuration(duration),
+                      style: GoogleFonts.baloo2(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.text),
+                    ),
+                    if (details.isNotEmpty)
+                      Text(
+                        details,
+                        style: GoogleFonts.quicksand(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.muted),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Shared row helpers ─────────────────────────────────────────────────────
+
+class _DateTile extends StatelessWidget {
+  const _DateTile({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 46,
+      height: 46,
+      decoration: BoxDecoration(
+        color: AppColors.chipBg,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Center(
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.baloo2(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: AppColors.text),
+        ),
+      ),
+    );
+  }
+}
+
+class _FailureBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.failBg,
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.local_fire_department,
+              size: 14, color: AppColors.failText),
+          const SizedBox(width: 3),
+          Text(
+            'Failure',
+            style: GoogleFonts.quicksand(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: AppColors.failText),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Widget _deleteBackground() => Container(
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: 20),
+      decoration: BoxDecoration(
+        color: AppColors.failText,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: const Icon(Icons.delete, color: Colors.white),
+    );
+
+Future<bool?> _confirmDelete(BuildContext context) => showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete entry?'),
+        content: const Text('This cannot be undone.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Delete')),
+        ],
+      ),
+    );
+
+// ── Info chip ──────────────────────────────────────────────────────────────
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({required this.label, this.icon});
+  final String label;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.chipBg,
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 15, color: AppColors.chipText),
+            const SizedBox(width: 5),
+          ],
+          Text(
+            label,
+            style: GoogleFonts.quicksand(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppColors.chipText,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -459,12 +681,15 @@ class _AddEntryButton extends StatelessWidget {
   const _AddEntryButton({
     required this.exerciseId,
     required this.exerciseName,
+    required this.bodyPart,
   });
   final String exerciseId;
   final String exerciseName;
+  final String bodyPart;
 
   @override
   Widget build(BuildContext context) {
+    final isEndurance = WorkoutIcons.isEndurance(bodyPart);
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -482,6 +707,7 @@ class _AddEntryButton extends StatelessWidget {
           builder: (_) => AddEntryScreen(
             exerciseId: exerciseId,
             exerciseName: exerciseName,
+            bodyPart: bodyPart,
           ),
         )),
         child: Container(
@@ -495,10 +721,14 @@ class _AddEntryButton extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.add, color: AppColors.onPrimary, size: 22),
+                Icon(
+                  isEndurance ? Icons.timer : Icons.add,
+                  color: AppColors.onPrimary,
+                  size: 22,
+                ),
                 const SizedBox(width: 8),
                 Text(
-                  'Add entry',
+                  isEndurance ? 'Log session' : 'Add entry',
                   style: GoogleFonts.baloo2(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,

@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/firebase/firebase_providers.dart';
 import '../data/exercise.dart';
 import '../data/workout_date_utils.dart';
+import '../data/workout_day.dart';
 import '../data/workout_entry.dart';
+import '../data/workout_icons.dart';
 import '../data/workout_repository.dart';
 
 // ── Repository ─────────────────────────────────────────────────────────────
@@ -15,6 +17,12 @@ final workoutRepositoryProvider = Provider<WorkoutRepository>((ref) {
     db: ref.watch(firestoreProvider),
     userId: authUser.uid,
   );
+});
+
+// ── Days ────────────────────────────────────────────────────────────────────
+
+final daysProvider = StreamProvider<List<WorkoutDay>>((ref) {
+  return ref.watch(workoutRepositoryProvider).watchDays();
 });
 
 // ── Exercises ───────────────────────────────────────────────────────────────
@@ -101,12 +109,14 @@ final weeklyProgressProvider =
   final end = weekEnd(start);
   final exercises =
       ref.watch(exercisesProvider(false)).asData?.value ?? [];
+  final strengthExercises =
+      exercises.where((e) => !WorkoutIcons.isEndurance(e.bodyPart)).toList();
 
   final dayVolumes = List<double>.filled(7, 0);
   final activeDays = <int>{};
   var totalReps = 0;
 
-  for (final exercise in exercises) {
+  for (final exercise in strengthExercises) {
     final params = WeeklyEntriesParams(exercise.id, start, end);
     final entries =
         ref.watch(weeklyEntriesProvider(params)).asData?.value ?? [];

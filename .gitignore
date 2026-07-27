@@ -44,6 +44,11 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Signing secrets — never commit
+/android/key.properties
+*.jks
+*.keystore
+
 # Obsidian local settings (vault notes are committed, settings are not)
 docs/vault/.obsidian/
 

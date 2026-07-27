@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Baloo+2:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  button { font-family: inherit; }
+  input { font-family: inherit; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="412" height="892" hint-size="412px,892px">
+<div style="height:100%;display:flex;flex-direction:column;background:{{t.bg}};font-family:{{t.fontBody}};color:{{t.text}};overflow:hidden">
+
+  <!-- ══════════════ LIST ══════════════ -->
+  <sc-if value="{{isList}}" hint-placeholder-val="{{ true }}">
+  <div style="height:100%;display:flex;flex-direction:column;position:relative">
+    <div style="padding:22px 22px 10px;flex-shrink:0">
+      <div style="font-family:{{t.fontBody}};font-size:12px;font-weight:800;letter-spacing:1.6px;color:{{t.muted}};text-transform:uppercase">Let's move</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px">
+        <h1 style="margin:0;font-family:{{t.fontHead}};font-size:31px;font-weight:600;color:{{t.text}}">My Workouts</h1>
+        <button onClick="{{toggleGroup}}" style="flex-shrink:0;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;background:{{groupBtnBg}};color:{{groupBtnFg}};font-family:{{t.fontBody}};font-size:13px;font-weight:800;padding:9px 14px;border-radius:100px;box-shadow:{{groupBtnShadow}}">
+          <span style="font-family:'Material Symbols Outlined';font-size:18px">{{groupBtnIcon}}</span>{{groupBtnLabel}}
+        </button>
+      </div>
+    </div>
+    <div style="flex:1;overflow:auto;padding:8px 18px 100px">
+
+      <sc-if value="{{flatMode}}" hint-placeholder-val="{{ true }}">
+        <sc-for list="{{exercises}}" as="ex" hint-placeholder-count="5">
+          <button onClick="{{ex.onOpen}}" style="border:none;cursor:pointer;width:100%;display:flex;align-items:center;gap:14px;background:{{t.surface}};border-radius:{{t.radius}}px;box-shadow:{{t.shadow}};padding:13px;margin-bottom:13px">
+            <div style="width:54px;height:54px;flex-shrink:0;border-radius:{{ex.iconRadius}};background:{{ex.tileBg}};display:flex;align-items:center;justify-content:center">
+              <span style="font-family:'Material Symbols Outlined';font-size:29px;color:{{ex.tileFg}}">{{ex.icon}}</span>
+            </div>
+            <div style="flex:1;min-width:0;text-align:left">
+              <div style="font-family:{{t.fontHead}};font-weight:600;font-size:17px;color:{{t.text}}">{{ex.name}}</div>
+              <div style="font-family:{{t.fontBody}};font-weight:700;font-size:13px;color:{{t.muted}};margin-top:2px">{{ex.sub}}</div>
+            </div>
+            <span style="font-family:'Material Symbols Outlined';font-size:24px;color:{{t.muted}}">chevron_right</span>
+          </button>
+        </sc-for>
+      </sc-if>
+
+      <sc-if value="{{groupMode}}">
+        <sc-if value="{{noDays}}">
+          <div style="text-align:center;padding:34px 18px 26px;background:{{t.surface}};border-radius:{{t.radius}}px;box-shadow:{{t.shadow}}">
+            <span style="font-family:'Material Symbols Outlined';font-size:44px;color:{{t.primary}}">calendar_add_on</span>
+            <div style="font-family:{{t.fontHead}};font-size:19px;font-weight:600;color:{{t.text}};margin-top:10px">No days yet</div>
+            <div style="font-family:{{t.fontBody}};font-size:14px;font-weight:700;color:{{t.muted}};margin-top:6px;line-height:1.45">Create a day like “Day 1 · Push”, then fill it with exercises.</div>
+          </div>
+        </sc-if>
+
+        <sc-for list="{{dayGroups}}" as="g" hint-placeholder-count="2">
+          <div style="margin-bottom:22px">
+            <div style="display:flex;align-items:center;gap:10px;padding:0 2px 10px">
+              <div style="width:30px;height:30px;flex-shrink:0;border-radius:{{t.iconRadiusSm}};background:{{t.chipBg}};display:flex;align-items:center;justify-content:center;font-family:{{t.fontHead}};font-size:14px;font-weight:700;color:{{t.chipText}}">{{g.num}}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-family:{{t.fontHead}};font-size:18px;font-weight:600;color:{{t.text}}">{{g.name}}</div>
+                <div style="font-family:{{t.fontBody}};font-size:12px;font-weight:700;color:{{t.muted}}">{{g.count}}</div>
+              </div>
+              <button onClick="{{g.onDelete}}" style="width:34px;height:34px;flex-shrink:0;border:none;background:none;cursor:pointer;border-radius:12px;display:flex;align-items:center;justify-content:center;color:{{t.muted}}">
+                <span style="font-family:'Material Symbols Outlined';font-size:20px">delete</span>
+              </button>
+            </div>
+            <sc-for list="{{g.exercises}}" as="ex" hint-placeholder-count="2">
+              <button onClick="{{ex.onOpen}}" style="border:none;cursor:pointer;width:100%;display:flex;align-items:center;gap:14px;background:{{t.surface}};border-radius:{{t.radius}}px;box-shadow:{{t.shadow}};padding:13px;margin-bottom:11px">
+                <div style="width:54px;height:54px;flex-shrink:0;border-radius:{{ex.iconRadius}};background:{{ex.tileBg}};display:flex;align-items:center;justify-content:center">
+                  <span style="font-family:'Material Symbols Outlined';font-size:29px;color:{{ex.tileFg}}">{{ex.icon}}</span>
+                </div>
+                <div style="flex:1;min-width:0;text-align:left">
+                  <div style="font-family:{{t.fontHead}};font-weight:600;font-size:17px;color:{{t.text}}">{{ex.name}}</div>
+                  <div style="font-family:{{t.fontBody}};font-weight:700;font-size:13px;color:{{t.muted}};margin-top:2px">{{ex.sub}}</div>
+                </div>
+                <span style="font-family:'Material Symbols Outlined';font-size:24px;color:{{t.muted}}">chevron_right</span>
+              </button>
+            </sc-for>
+            <button onClick="{{g.onAdd}}" style="width:100%;border:2px dashed {{t.border}};background:none;cursor:pointer;border-radius:{{t.radius}}px;padding:14px;display:flex;align-items:center;justify-content:center;gap:7px;color:{{t.muted}};font-family:{{t.fontBody}};font-size:14px;font-weight:700">
+              <span style="font-family:'Material Symbols Outlined';font-size:20px">add</span>Add exercises
+            </button>
+          </div>
+        </sc-for>
+
+        <button onClick="{{onNewDay}}" style="width:100%;border:none;cursor:pointer;background:{{t.primarySoft}};color:{{t.chipText}};border-radius:{{t.radius}}px;padding:16px;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:8px;font-family:{{t.fontHead}};font-size:16px;font-weight:600">
+          <span style="font-family:'Material Symbols Outlined';font-size:21px">calendar_add_on</span>New day
+        </button>
+
+      </sc-if>
+
+    </div>
+    <button onClick="{{onAddExercise}}" style="position:absolute;right:18px;bottom:84px;width:62px;height:62px;border-radius:22px;border:none;cursor:pointer;background:{{t.primary}};color:{{t.onPrimary}};box-shadow:0 10px 22px {{t.primaryGlow}};display:flex;align-items:center;justify-content:center">
+      <span style="font-family:'Material Symbols Outlined';font-size:31px">add</span>
+    </button>
+    <div style="flex-shrink:0;display:flex;background:{{t.surface}};border-top:1px solid {{t.border}};padding:10px 0 12px">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:{{t.primary}}">
+        <span style="font-family:'Material Symbols Outlined';font-size:25px">home</span>
+        <span style="font-family:{{t.fontBody}};font-size:12px;font-weight:800">Home</span>
+      </div>
+      <button onClick="{{navProgress}}" style="flex:1;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:{{t.muted}}">
+        <span style="font-family:'Material Symbols Outlined';font-size:25px">bar_chart</span>
+        <span style="font-family:{{t.fontBody}};font-size:12px;font-weight:800">Progress</span>
+      </button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ══════════════ DETAIL ══════════════ -->
+  <sc-if value="{{isDetail}}">
+  <div style="height:100%;display:flex;flex-direction:column">
+    <div style="flex-shrink:0;display:flex;align-items:center;gap:6px;padding:14px 14px 6px">
+      <button onClick="{{onBackList}}" style="width:42px;height:42px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:{{t.text}}">
+        <span style="font-family:'Material Symbols Outlined';font-size:26px">arrow_back</span>
+      </button>
+    </div>
+    <div style="flex:1;overflow:auto;padding:0 20px 110px">
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center">
+        <div style="width:88px;height:88px;border-radius:{{t.heroRadius}};background:{{selTileBg}};display:flex;align-items:center;justify-content:center">
+          <span style="font-family:'Material Symbols Outlined';font-size:46px;color:{{selTileFg}}">{{sel.icon}}</span>
+        </div>
+        <h1 style="margin:14px 0 0;font-family:{{t.fontHead}};font-size:27px;font-weight:600;color:{{t.text}}">{{sel.name}}</h1>
+        <div style="display:flex;gap:7px;margin-top:8px">
+          <span style="font-family:{{t.fontBody}};font-weight:700;font-size:13px;color:{{t.chipText}};background:{{t.chipBg}};padding:6px 14px;border-radius:100px">{{sel.bodyPart}}</span>
+          <sc-if value="{{selHasDay}}">
+            <span style="display:flex;align-items:center;gap:4px;font-family:{{t.fontBody}};font-weight:700;font-size:13px;color:{{t.chipText}};background:{{t.chipBg}};padding:6px 14px;border-radius:100px">
+              <span style="font-family:'Material Symbols Outlined';font-size:15px">calendar_today</span>{{selDayName}}
+            </span>
+          </sc-if>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:22px">
+        <div style="flex:1;background:{{t.surface}};border-radius:{{t.radiusSm}}px;box-shadow:{{t.shadow}};padding:14px 8px;text-align:center">
+          <div style="font-family:{{t.fontHead}};font-size:25px;font-weight:700;color:{{t.text}}">{{sessions}}</div>
+          <div style="font-family:{{t.fontBody}};font-size:11px;font-weight:800;letter-spacing:0.4px;color:{{t.muted}};text-transform:uppercase;margin-top:2px">Sessions</div>
+        </div>
+        <div style="flex:1;background:{{t.surface}};border-radius:{{t.radiusSm}}px;box-shadow:{{t.shadow}};padding:14px 8px;text-align:center">
+          <div style="font-family:{{t.fontHead}};font-size:25px;font-weight:700;color:{{t.text}}">{{bestReps}}</div>
+          <div style="font-family:{{t.fontBody}};font-size:11px;font-weight:800;letter-spacing:0.4px;color:{{t.muted}};text-transform:uppercase;margin-top:2px">Best reps</div>
+        </div>
+        <div style="flex:1;background:{{t.surface}};border-radius:{{t.radiusSm}}px;box-shadow:{{t.shadow}};padding:14px 8px;text-align:center">
+          <div style="font-family:{{t.fontHead}};font-size:25px;font-weight:700;color:{{t.text}}">{{totalSets}}</div>
+          <div style="font-family:{{t.fontBody}};font-size:11px;font-weight:800;letter-spacing:0.4px;color:{{t.muted}};text-transform:uppercase;margin-top:2px">Total sets</div>
+        </div>
+      </div>
+
+      <sc-if value="{{hasChart}}">
+      <div style="margin-top:16px;background:{{t.surface}};border-radius:{{t.radius}}px;box-shadow:{{t.shadow}};padding:18px">
+        <div style="font-family:{{t.fontHead}};font-size:16px;font-weight:600;color:{{t.text}};margin-bottom:14px">Volume per session</div>
+        <div style="display:flex;align-items:flex-end;gap:10px;height:104px">
+          <sc-for list="{{chartBars}}" as="bar" hint-placeholder-count="3">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px">
+              <div style="width:100%;height:{{bar.h}}%;min-height:6px;background:{{t.primary}};border-radius:8px 8px 5px 5px"></div>
+              <span style="font-family:{{t.fontBody}};font-size:11px;font-weight:700;color:{{t.muted}}">{{bar.label}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <div style="font-family:{{t.fontHead}};font-size:16px;font-weight:600;color:{{t.text}};margin:22px 4px 12px">History</div>
+      <sc-if value="{{hasEntries}}">
+        <sc-for list="{{selEntries}}" as="e" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:14px;background:{{t.surface}};border-radius:{{t.radiusSm}}px;box-shadow:{{t.shadow}};padding:13px 15px;margin-bottom:10px">
+            <div style="width:46px;height:46px;flex-shrink:0;border-radius:{{t.iconRadiusSm}};background:{{t.chipBg}};display:flex;flex-direction:column;align-items:center;justify-content:center;color:{{t.chipText}}">
+              <span style="font-family:{{t.fontHead}};font-size:14px;font-weight:700;line-height:1">{{e.date}}</span>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-family:{{t.fontHead}};font-size:16px;font-weight:600;color:{{t.text}}">{{e.reps}} reps &times; {{e.sets}} sets</div>
+              <div style="font-family:{{t.fontBody}};font-size:12px;font-weight:700;color:{{t.muted}};margin-top:1px">{{e.vol}} total reps</div>
+            </div>
+            <sc-if value="{{e.failure}}">
+              <span style="display:flex;align-items:center;gap:4px;font-family:{{t.fontBody}};font-size:11px;font-weight:800;color:{{t.failText}};background:{{t.failBg2}};padding:5px 9px;border-radius:100px">
+                <span style="font-family:'Material Symbols Outlined';font-size:14px">local_fire_department</span>Failure
+              </span>
+            </sc-if>
+          </div>
+        </sc-for>
+      </sc-if>
+      <sc-if value="{{noEntries}}">
+        <div style="text-align:center;padding:26px 10px;color:{{t.muted}}">
+          <span style="font-family:'Material Symbols Outlined';font-size:38px;opacity:0.6">note_add</span>
+          <div style="font-family:{{t.fontBody}};font-weight:700;font-size:14px;margin-top:8px">No entries yet — log your first set!</div>
+        </div>
+      </sc-if>
+    </div>
+    <div style="flex-shrink:0;padding:14px 18px 20px;background:linear-gradient(to top, {{t.bg}} 70%, transparent)">
+      <button onClick="{{onAddEntry}}" style="width:100%;border:none;cursor:pointer;background:{{t.primary}};color:{{t.onPrimary}};font-family:{{t.fontHead}};font-size:17px;font-weight:600;padding:16px;border-radius:18px;box-shadow:0 10px 22px {{t.primaryGlow}};display:flex;align-items:center;justify-content:center;gap:8px">
+        <span style="font-family:'Material Symbols Outlined';font-size:22px">add</span>Add entry
+      </button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ══════════════ ADD ENTRY ══════════════ -->
+  <sc-if value="{{isAddEntry}}">
+  <div style="height:100%;display:flex;flex-direction:column">
+    <div style="flex-shrink:0;display:flex;align-items:center;gap:6px;padding:14px 14px 6px">
+      <button onClick="{{onBackDetail}}" style="width:42px;height:42px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:{{t.text}}">
+        <span style="font-family:'Material Symbols Outlined';font-size:26px">arrow_back</span>
+      </button>
+    </div>
+    <div style="flex:1;overflow:auto;padding:6px 22px 20px">
+      <div style="font-family:{{t.fontBody}};font-size:12px;font-weight:800;letter-spacing:1.4px;color:{{t.muted}};text-transform:uppercase">{{sel.name}}</div>
+      <h1 style="margin:5px 0 22px;font-family:{{t.fontHead}};font-size:28px;font-weight:600;color:{{t.text}}">Log a set</h1>
+
+      <div style="background:{{t.surface}};border-radius:{{t.radius}}px;box-shadow:{{t.shadow}};padding:20px;margin-bottom:14px">
+        <div style="font-family:{{t.fontBody}};font-size:13px;font-weight:800;letter-spacing:0.6px;color:{{t.muted}};text-transform:uppercase">Reps</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+          <button onClick="{{repsDown}}" style="width:46px;height:46px;border:none;cursor:pointer;border-radius:16px;background:{{t.chipBg}};color:{{t.chipText}};display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:26px">remove</span></button>
+          <div style="font-family:{{t.fontHead}};font-size:44px;font-weight:700;color:{{t.text}};min-width:70px;text-align:center">{{ne.reps}}</div>
+          <button onClick="{{repsUp}}" style="width:46px;height:46px;border:none;cursor:pointer;border-radius:16px;background:{{t.primary}};color:{{t.onPrimary}};display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:26px">add</span></button>
+        </div>
+      </div>
+
+      <div style="background:{{t.surface}};border-radius:{{t.radius}}px;box-shadow:{{t.shadow}};padding:20px;margin-bottom:14px">
+        <div style="font-family:{{t.fontBody}};font-size:13px;font-weight:800;letter-spacing:0.6px;color:{{t.muted}};text-transform:uppercase">Sets</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+          <button onClick="{{setsDown}}" style="width:46px;height:46px;border:none;cursor:pointer;border-radius:16px;background:{{t.chipBg}};color:{{t.chipText}};display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:26px">remove</span></button>
+          <div style="font-family:{{t.fontHead}};font-size:44px;font-weight:700;color:{{t.text}};min-width:70px;text-align:center">{{ne.sets}}</div>
+          <button onClick="{{setsUp}}" style="width:46px;height:46px;border:none;cursor:pointer;border-radius:16px;background:{{t.primary}};color:{{t.onPrimary}};display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:26px">add</span></button>
+        </div>
+      </div>
+
+      <button onClick="{{toggleFail}}" style="width:100%;border:none;cursor:pointer;text-align:left;background:{{t.surface}};border-radius:{{t.radius}}px;box-shadow:{{t.shadow}};padding:18px 20px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-family:{{t.fontHead}};font-size:17px;font-weight:600;color:{{t.text}}">Went to failure?</div>
+          <div style="font-family:{{t.fontBody}};font-size:12px;font-weight:700;color:{{t.muted}};margin-top:2px">Last set with nothing left</div>
+        </div>
+        <div style="width:54px;height:31px;border-radius:100px;background:{{failBg}};position:relative;flex-shrink:0;transition:background .2s">
+          <div style="position:absolute;top:3px;left:{{knobX}};width:25px;height:25px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,0.2);transition:left .2s"></div>
+        </div>
+      </button>
+    </div>
+    <div style="flex-shrink:0;padding:14px 22px 20px">
+      <button onClick="{{onSaveEntry}}" style="width:100%;border:none;cursor:pointer;background:{{t.primary}};color:{{t.onPrimary}};font-family:{{t.fontHead}};font-size:17px;font-weight:600;padding:16px;border-radius:18px;box-shadow:0 10px 22px {{t.primaryGlow}}">Save entry</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ══════════════ ADD EXERCISE ══════════════ -->
+  <sc-if value="{{isAddExercise}}">
+  <div style="height:100%;display:flex;flex-direction:column">
+    <div style="flex-shrink:0;display:flex;align-items:center;gap:6px;padding:14px 14px 6px">
+      <button onClick="{{onBackList}}" style="width:42px;height:42px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:{{t.text}}">
+        <span style="font-family:'Material Symbols Outlined';font-size:26px">arrow_back</span>
+      </button>
+    </div>
+    <div style="flex:1;overflow:auto;padding:6px 22px 20px">
+      <h1 style="margin:0 0 20px;font-family:{{t.fontHead}};font-size:28px;font-weight:600;color:{{t.text}}">New exercise</h1>
+
+      <div style="display:flex;justify-content:center;margin-bottom:22px">
+        <div style="width:92px;height:92px;border-radius:{{t.heroRadius}};background:{{t.primarySoft}};display:flex;align-items:center;justify-content:center">
+          <span style="font-family:'Material Symbols Outlined';font-size:48px;color:{{t.primary}}">{{nxIcon}}</span>
+        </div>
+      </div>
+
+      <div style="font-family:{{t.fontBody}};font-size:13px;font-weight:800;letter-spacing:0.6px;color:{{t.muted}};text-transform:uppercase;margin-bottom:8px">Name</div>
+      <input value="{{nx.name}}" onInput="{{setNxName}}" placeholder="e.g. Lunges" style="width:100%;border:none;outline:none;background:{{t.surface}};border-radius:{{t.radiusSm}}px;box-shadow:{{t.shadow}};padding:15px 16px;font-family:{{t.fontHead}};font-size:17px;font-weight:600;color:{{t.text}}" />
+
+      <div style="font-family:{{t.fontBody}};font-size:13px;font-weight:800;letter-spacing:0.6px;color:{{t.muted}};text-transform:uppercase;margin:22px 0 10px">Body part</div>
+      <div style="display:flex;flex-wrap:wrap;gap:9px">
+        <sc-for list="{{bodyParts}}" as="bp" hint-placeholder-count="7">
+          <button onClick="{{bp.onPick}}" style="border:none;cursor:pointer;font-family:{{t.fontBody}};font-size:14px;font-weight:700;padding:10px 16px;border-radius:100px;background:{{bp.bg}};color:{{bp.color}};box-shadow:{{bp.shadow}}">{{bp.name}}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="flex-shrink:0;padding:14px 22px 20px">
+      <button onClick="{{onSaveExercise}}" style="width:100%;border:none;cursor:pointer;background:{{t.primary}};color:{{t.onPrimary}};font-family:{{t.fontHead}};font-size:17px;font-weight:600;padding:16px;border-radius:18px;box-shadow:0 10px 22px {{t.primaryGlow}}">Create exercise</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ══════════════ PICK EXERCISES FOR A DAY ══════════════ -->
+  <sc-if value="{{isPick}}">
+  <div style="height:100%;display:flex;flex-direction:column">
+    <div style="flex-shrink:0;display:flex;align-items:center;gap:6px;padding:14px 14px 6px">
+      <button onClick="{{onBackList}}" style="width:42px;height:42px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:{{t.text}}">
+        <span style="font-family:'Material Symbols Outlined';font-size:26px">arrow_back</span>
+      </button>
+    </div>
+    <div style="flex:1;overflow:auto;padding:6px 20px 20px">
+      <div style="font-family:{{t.fontBody}};font-size:12px;font-weight:800;letter-spacing:1.4px;color:{{t.muted}};text-transform:uppercase">{{pickDayName}}</div>
+      <h1 style="margin:5px 0 18px;font-family:{{t.fontHead}};font-size:28px;font-weight:600;color:{{t.text}}">Add exercises</h1>
+
+      <sc-for list="{{pickList}}" as="p" hint-placeholder-count="5">
+        <button onClick="{{p.onToggle}}" style="border:none;cursor:pointer;width:100%;display:flex;align-items:center;gap:13px;background:{{t.surface}};border-radius:{{t.radiusSm}}px;box-shadow:{{t.shadow}};padding:12px 14px;margin-bottom:10px">
+          <div style="width:44px;height:44px;flex-shrink:0;border-radius:{{p.iconRadius}};background:{{p.tileBg}};display:flex;align-items:center;justify-content:center">
+            <span style="font-family:'Material Symbols Outlined';font-size:24px;color:{{p.tileFg}}">{{p.icon}}</span>
+          </div>
+          <div style="flex:1;min-width:0;text-align:left">
+            <div style="font-family:{{t.fontHead}};font-weight:600;font-size:16px;color:{{t.text}}">{{p.name}}</div>
+            <div style="font-family:{{t.fontBody}};font-weight:700;font-size:12px;color:{{t.muted}};margin-top:1px">{{p.note}}</div>
+          </div>
+          <div style="width:26px;height:26px;flex-shrink:0;border-radius:50%;border:2px solid {{p.boxBorder}};background:{{p.boxBg}};display:flex;align-items:center;justify-content:center">
+            <span style="font-family:'Material Symbols Outlined';font-size:17px;color:{{t.onPrimary}};opacity:{{p.checkOpacity}}">check</span>
+          </div>
+        </button>
+      </sc-for>
+
+      <button onClick="{{onNewForDay}}" style="width:100%;border:2px dashed {{t.border}};background:none;cursor:pointer;border-radius:{{t.radiusSm}}px;padding:14px;display:flex;align-items:center;justify-content:center;gap:7px;color:{{t.muted}};font-family:{{t.fontBody}};font-size:14px;font-weight:700">
+        <span style="font-family:'Material Symbols Outlined';font-size:20px">add</span>Create a new exercise
+      </button>
+    </div>
+    <div style="flex-shrink:0;padding:14px 20px 20px">
+      <button onClick="{{onBackList}}" style="width:100%;border:none;cursor:pointer;background:{{t.primary}};color:{{t.onPrimary}};font-family:{{t.fontHead}};font-size:17px;font-weight:600;padding:16px;border-radius:18px;box-shadow:0 10px 22px {{t.primaryGlow}}">Done</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ══════════════ PROGRESS ══════════════ -->
+  <sc-if value="{{isProgress}}">
+  <div style="height:100%;display:flex;flex-direction:column">
+    <div style="padding:22px 22px 10px;flex-shrink:0">
+      <div style="font-family:{{t.fontBody}};font-size:12px;font-weight:800;letter-spacing:1.6px;color:{{t.muted}};text-transform:uppercase">This week</div>
+      <h1 style="margin:6px 0 0;font-family:{{t.fontHead}};font-size:31px;font-weight:600;color:{{t.text}}">Your Gains</h1>
+    </div>
+    <div style="flex:1;overflow:auto;padding:8px 20px 20px">
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <div style="flex:1;background:{{t.surface}};border-radius:{{t.radiusSm}}px;box-shadow:{{t.shadow}};padding:16px 8px;text-align:center">
+          <div style="font-family:{{t.fontHead}};font-size:26px;font-weight:700;color:{{t.text}}">{{workouts}}</div>
+          <div style="font-family:{{t.fontBody}};font-size:11px;font-weight:800;color:{{t.muted}};text-transform:uppercase;margin-top:2px">Workouts</div>
+        </div>
+        <div style="flex:1;background:{{t.surface}};border-radius:{{t.radiusSm}}px;box-shadow:{{t.shadow}};padding:16px 8px;text-align:center">
+          <div style="font-family:{{t.fontHead}};font-size:26px;font-weight:700;color:{{t.text}}">{{streak}}</div>
+          <div style="font-family:{{t.fontBody}};font-size:11px;font-weight:800;color:{{t.muted}};text-transform:uppercase;margin-top:2px">Day streak</div>
+        </div>
+        <div style="flex:1;background:{{t.surface}};border-radius:{{t.radiusSm}}px;box-shadow:{{t.shadow}};padding:16px 8px;text-align:center">
+          <div style="font-family:{{t.fontHead}};font-size:26px;font-weight:700;color:{{t.text}}">{{totalVol}}</div>
+          <div style="font-family:{{t.fontBody}};font-size:11px;font-weight:800;color:{{t.muted}};text-transform:uppercase;margin-top:2px">Total reps</div>
+        </div>
+      </div>
+
+      <div style="background:{{t.surface}};border-radius:{{t.radius}}px;box-shadow:{{t.shadow}};padding:20px">
+        <div style="font-family:{{t.fontHead}};font-size:16px;font-weight:600;color:{{t.text}};margin-bottom:16px">Weekly volume</div>
+        <div style="display:flex;align-items:flex-end;gap:9px;height:130px">
+          <sc-for list="{{weekly}}" as="w" hint-placeholder-count="7">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:7px">
+              <div style="width:100%;height:{{w.h}}%;min-height:5px;background:{{w.color}};border-radius:8px 8px 5px 5px"></div>
+              <span style="font-family:{{t.fontBody}};font-size:12px;font-weight:800;color:{{t.muted}}">{{w.d}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;background:{{t.primarySoft}};border-radius:{{t.radius}}px;padding:18px 20px;display:flex;align-items:center;gap:14px">
+        <span style="font-family:'Material Symbols Outlined';font-size:34px;color:{{t.primary}}">emoji_events</span>
+        <div>
+          <div style="font-family:{{t.fontHead}};font-size:16px;font-weight:600;color:{{t.text}}">Best week yet!</div>
+          <div style="font-family:{{t.fontBody}};font-size:13px;font-weight:700;color:{{t.chipText}};margin-top:1px">You're up 18% on last week. Keep it cozy.</div>
+        </div>
+      </div>
+    </div>
+    <div style="flex-shrink:0;display:flex;background:{{t.surface}};border-top:1px solid {{t.border}};padding:10px 0 12px">
+      <button onClick="{{navHome}}" style="flex:1;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:{{t.muted}}">
+        <span style="font-family:'Material Symbols Outlined';font-size:25px">home</span>
+        <span style="font-family:{{t.fontBody}};font-size:12px;font-weight:800">Home</span>
+      </button>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:{{t.primary}}">
+        <span style="font-family:'Material Symbols Outlined';font-size:25px">bar_chart</span>
+        <span style="font-family:{{t.fontBody}};font-size:12px;font-weight:800">Progress</span>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:412,&quot;height&quot;:892},&quot;theme&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;,&quot;default&quot;:{&quot;bg&quot;:&quot;#FBF3EC&quot;,&quot;surface&quot;:&quot;#FFFFFF&quot;,&quot;primary&quot;:&quot;#EF9270&quot;,&quot;onPrimary&quot;:&quot;#FFFFFF&quot;,&quot;primarySoft&quot;:&quot;#FBE0D3&quot;,&quot;primaryGlow&quot;:&quot;rgba(224,122,84,0.32)&quot;,&quot;text&quot;:&quot;#4B3A33&quot;,&quot;muted&quot;:&quot;#A99184&quot;,&quot;chipBg&quot;:&quot;#F6E7DC&quot;,&quot;chipText&quot;:&quot;#9A6B4E&quot;,&quot;border&quot;:&quot;#F0E4DA&quot;,&quot;failText&quot;:&quot;#C25B3A&quot;,&quot;failBg2&quot;:&quot;#FBE0D3&quot;,&quot;shadow&quot;:&quot;0 8px 22px rgba(180,120,90,0.13)&quot;,&quot;radius&quot;:26,&quot;radiusSm&quot;:18,&quot;iconRadius&quot;:&quot;50%&quot;,&quot;iconRadiusSm&quot;:&quot;40%&quot;,&quot;heroRadius&quot;:&quot;50%&quot;,&quot;fontHead&quot;:&quot;'Fredoka', sans-serif&quot;,&quot;fontBody&quot;:&quot;'Nunito', sans-serif&quot;,&quot;tiles&quot;:[{&quot;bg&quot;:&quot;#FBE0D3&quot;,&quot;fg&quot;:&quot;#E07A54&quot;},{&quot;bg&quot;:&quot;#E7EEDD&quot;,&quot;fg&quot;:&quot;#7FA05B&quot;},{&quot;bg&quot;:&quot;#FCE7C8&quot;,&quot;fg&quot;:&quot;#D69A3E&quot;},{&quot;bg&quot;:&quot;#F6DDE0&quot;,&quot;fg&quot;:&quot;#D06A82&quot;},{&quot;bg&quot;:&quot;#DDEAEA&quot;,&quot;fg&quot;:&quot;#5E9A9A&quot;}]}}}">
+class Component extends DCLogic {
+  bodyPartsList = ['Chest','Back','Legs','Shoulders','Arms','Core','Cardio'];
+  bpIcon = { Chest:'exercise', Back:'rowing', Legs:'directions_run', Shoulders:'sports_gymnastics', Arms:'fitness_center', Core:'self_improvement', Cardio:'directions_bike' };
+
+  state = {
+    screen: 'list',
+    selectedId: 1,
+    ne: { reps: 10, sets: 3, failure: false },
+    nx: { name: '', bodyPart: 'Chest' },
+    grouped: false,
+    pickDayId: null,
+    days: [],
+    exercises: [
+      { id:1, name:'Push-Ups', bodyPart:'Chest', day:null, icon:'exercise', entries:[
+        { reps:15, sets:3, failure:true, date:'Mon' },
+        { reps:12, sets:3, failure:false, date:'Wed' },
+        { reps:16, sets:4, failure:true, date:'Fri' } ] },
+      { id:2, name:'Goblet Squats', bodyPart:'Legs', day:null, icon:'directions_run', entries:[
+        { reps:12, sets:4, failure:false, date:'Mon' },
+        { reps:12, sets:4, failure:true, date:'Thu' } ] },
+      { id:3, name:'Dumbbell Rows', bodyPart:'Back', day:null, icon:'rowing', entries:[
+        { reps:10, sets:3, failure:false, date:'Tue' },
+        { reps:11, sets:4, failure:true, date:'Fri' } ] },
+      { id:4, name:'Bicep Curls', bodyPart:'Arms', day:null, icon:'fitness_center', entries:[
+        { reps:12, sets:3, failure:true, date:'Wed' } ] },
+      { id:5, name:'Plank', bodyPart:'Core', day:null, icon:'self_improvement', entries:[] },
+    ],
+    weekly: [
+      {d:'M',v:120},{d:'T',v:0},{d:'W',v:180},{d:'T',v:90},{d:'F',v:210},{d:'S',v:150},{d:'S',v:0} ],
+  };
+
+  go(screen){ this.setState({ screen }); }
+  openDetail(id){ this.setState({ screen:'detail', selectedId:id }); }
+  goAddEntry(){ this.setState({ screen:'addEntry', ne:{ reps:10, sets:3, failure:false } }); }
+  goAddExercise(keepDay){ this.setState(s => ({ screen:'addExercise', nx:{ name:'', bodyPart:'Chest' }, pickDayId: keepDay ? s.pickDayId : null })); }
+  toggleGroup(){ this.setState(s => ({ grouped: !s.grouped })); }
+  addDay(){
+    this.setState(s => {
+      const n = s.days.length + 1;
+      const id = Math.max(0, ...s.days.map(d => d.id)) + 1;
+      return { days:[ ...s.days, { id, name:'Day ' + n } ] };
+    });
+  }
+  deleteDay(id){
+    this.setState(s => ({
+      days: s.days.filter(d => d.id !== id).map((d,i) => ({ ...d, name:'Day ' + (i+1) })),
+      exercises: s.exercises.map(e => e.day === id ? { ...e, day:null } : e),
+    }));
+  }
+  goPick(dayId){ this.setState({ screen:'pick', pickDayId:dayId }); }
+  toggleInDay(exId){
+    this.setState(s => ({
+      exercises: s.exercises.map(e =>
+        e.id === exId ? { ...e, day: e.day === s.pickDayId ? null : s.pickDayId } : e ),
+    }));
+  }
+  bump(field, d, min){ this.setState(s => ({ ne:{ ...s.ne, [field]: Math.max(min, s.ne[field]+d) } })); }
+  toggleFail(){ this.setState(s => ({ ne:{ ...s.ne, failure: !s.ne.failure } })); }
+  saveEntry(){
+    this.setState(s => {
+      const exercises = s.exercises.map(e =>
+        e.id === s.selectedId ? { ...e, entries:[ ...e.entries, { ...s.ne, date:'Today' } ] } : e );
+      return { exercises, screen:'detail' };
+    });
+  }
+  setNxName(e){ const v = e.target.value; this.setState(s => ({ nx:{ ...s.nx, name:v } })); }
+  setNxBP(bp){ this.setState(s => ({ nx:{ ...s.nx, bodyPart:bp } })); }
+  saveExercise(){
+    this.setState(s => {
+      const name = (s.nx.name || '').trim() || 'New Exercise';
+      const id = Math.max(0, ...s.exercises.map(e => e.id)) + 1;
+      const exercises = [ ...s.exercises, { id, name, bodyPart:s.nx.bodyPart, day:s.pickDayId, icon:this.bpIcon[s.nx.bodyPart], entries:[] } ];
+      return { exercises, screen:'detail', selectedId:id };
+    });
+  }
+
+  renderVals(){
+    const t = this.props.theme || {};
+    const scr = this.state.screen;
+    const tiles = t.tiles || [{bg:'#eee',fg:'#888'}];
+
+    const exercises = this.state.exercises.map((e,i) => ({
+      ...e,
+      tileBg: tiles[i % tiles.length].bg,
+      tileFg: tiles[i % tiles.length].fg,
+      iconRadius: t.iconRadius,
+      sessions: e.entries.length,
+      sub: e.bodyPart + ' \u00b7 ' + e.entries.length + (e.entries.length === 1 ? ' session' : ' sessions'),
+      onOpen: () => this.openDetail(e.id),
+    }));
+
+    const dayGroups = this.state.days.map((d,i) => {
+      const list = exercises.filter(e => e.day === d.id);
+      return {
+        id: d.id, num: i + 1, name: d.name,
+        exercises: list,
+        count: list.length + (list.length === 1 ? ' exercise' : ' exercises'),
+        empty: list.length === 0,
+        onAdd: () => this.goPick(d.id),
+        onDelete: () => this.deleteDay(d.id),
+      };
+    });
+
+    const pickDay = this.state.days.find(d => d.id === this.state.pickDayId);
+    const pickList = exercises.map(e => {
+      const inDay = e.day === this.state.pickDayId;
+      const otherDay = e.day && !inDay ? this.state.days.find(d => d.id === e.day) : null;
+      return {
+        ...e, inDay,
+        note: inDay ? 'In this day' : (otherDay ? 'In ' + otherDay.name : e.bodyPart),
+        boxBg: inDay ? t.primary : 'transparent',
+        boxBorder: inDay ? t.primary : t.border,
+        checkOpacity: inDay ? 1 : 0,
+        onToggle: () => this.toggleInDay(e.id),
+      };
+    });
+
+    const sel = this.state.exercises.find(e => e.id === this.state.selectedId) || this.state.exercises[0];
+    const selDay = this.state.days.find(d => d.id === sel.day);
+    const selIdx = Math.max(0, this.state.exercises.findIndex(e => e.id === this.state.selectedId));
+    const selTile = tiles[selIdx % tiles.length];
+    const bars = sel.entries.map(e => e.reps * e.sets);
+    const maxBar = Math.max(1, ...bars);
+    const selEntries = sel.entries.map(e => ({
+      ...e, vol: e.reps * e.sets,
+    })).reverse();
+    const chartBars = sel.entries.map(e => ({ h: Math.round(e.reps*e.sets / maxBar * 100), label: e.date }));
+    const totalSets = sel.entries.reduce((a,e) => a + e.sets, 0);
+    const bestReps = sel.entries.reduce((a,e) => Math.max(a, e.reps), 0);
+
+    const wk = this.state.weekly;
+    const wkMax = Math.max(1, ...wk.map(x => x.v));
+    const weekly = wk.map(x => ({ ...x, h: Math.round(x.v / wkMax * 100), color: x.v > 0 ? t.primary : t.border }));
+    const totalVol = wk.reduce((a,x) => a + x.v, 0);
+    const workouts = wk.filter(x => x.v > 0).length;
+
+    const bodyParts = this.bodyPartsList.map(bp => {
+      const active = bp === this.state.nx.bodyPart;
+      return {
+        name: bp, active,
+        bg: active ? t.primary : t.chipBg,
+        color: active ? t.onPrimary : t.chipText,
+        shadow: active ? ('0 6px 14px ' + t.primaryGlow) : 'none',
+        onPick: () => this.setNxBP(bp),
+      };
+    });
+
+    return {
+      t, exercises, screen: scr, dayGroups,
+      selDayName: selDay ? selDay.name : '', selHasDay: !!selDay,
+      grouped: this.state.grouped,
+      flatMode: scr==='list' && !this.state.grouped,
+      groupMode: scr==='list' && this.state.grouped,
+      noDays: this.state.days.length === 0,
+      groupBtnBg: this.state.grouped ? t.primary : t.chipBg,
+      groupBtnFg: this.state.grouped ? t.onPrimary : t.chipText,
+      groupBtnShadow: this.state.grouped ? ('0 6px 14px ' + t.primaryGlow) : 'none',
+      groupBtnIcon: this.state.grouped ? 'view_agenda' : 'calendar_view_week',
+      groupBtnLabel: this.state.grouped ? 'All' : 'By day',
+      pickList, pickDayName: pickDay ? pickDay.name : '',
+      onNewDay: () => this.addDay(),
+      toggleGroup: () => this.toggleGroup(),
+      onNewForDay: () => this.goAddExercise(true),
+      isList: scr==='list', isDetail: scr==='detail', isAddEntry: scr==='addEntry',
+      isAddExercise: scr==='addExercise', isProgress: scr==='progress', isPick: scr==='pick',
+      sel, selTileBg: selTile.bg, selTileFg: selTile.fg,
+      selEntries, hasEntries: sel.entries.length > 0, noEntries: sel.entries.length === 0,
+      chartBars, hasChart: bars.length > 0,
+      sessions: sel.entries.length, totalSets, bestReps,
+      ne: this.state.ne, nx: this.state.nx, nxIcon: this.bpIcon[this.state.nx.bodyPart],
+      failBg: this.state.ne.failure ? t.primary : t.border,
+      knobX: this.state.ne.failure ? '26px' : '3px',
+      bodyParts,
+      weekly, totalVol, workouts, streak: 3,
+      onAddEntry: () => this.goAddEntry(), onAddExercise: () => this.goAddExercise(),
+      onBackList: () => this.go('list'), onBackDetail: () => this.go('detail'),
+      onSaveEntry: () => this.saveEntry(), onSaveExercise: () => this.saveExercise(),
+      repsUp: () => this.bump('reps',1,1), repsDown: () => this.bump('reps',-1,1),
+      setsUp: () => this.bump('sets',1,1), setsDown: () => this.bump('sets',-1,1),
+      toggleFail: () => this.toggleFail(), setNxName: (e) => this.setNxName(e),
+      navHome: () => this.go('list'), navProgress: () => this.go('progress'),
+    };
+  }
+}
+</script>
+</body>
+</html>

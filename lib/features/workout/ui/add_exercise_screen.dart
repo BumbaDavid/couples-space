@@ -7,7 +7,8 @@ import '../data/workout_icons.dart';
 import '../providers/workout_providers.dart';
 
 class AddExerciseScreen extends ConsumerStatefulWidget {
-  const AddExerciseScreen({super.key});
+  const AddExerciseScreen({super.key, this.dayId});
+  final String? dayId;
 
   @override
   ConsumerState<AddExerciseScreen> createState() => _AddExerciseScreenState();
@@ -33,7 +34,7 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
     try {
       await ref
           .read(workoutRepositoryProvider)
-          .createExercise(name: name, bodyPart: _bodyPart);
+          .createExercise(name: name, bodyPart: _bodyPart, dayId: widget.dayId);
       if (mounted) Navigator.of(context).pop();
     } finally {
       if (mounted) setState(() => _saving = false);

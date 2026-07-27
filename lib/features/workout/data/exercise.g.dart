@@ -12,6 +12,9 @@ _Exercise _$ExerciseFromJson(Map<String, dynamic> json) => _Exercise(
   bodyPart: json['bodyPart'] as String,
   isArchived: json['isArchived'] as bool? ?? false,
   createdAt: DateTime.parse(json['createdAt'] as String),
+  dayIds:
+      (json['dayIds'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$ExerciseToJson(_Exercise instance) => <String, dynamic>{
@@ -20,4 +23,5 @@ Map<String, dynamic> _$ExerciseToJson(_Exercise instance) => <String, dynamic>{
   'bodyPart': instance.bodyPart,
   'isArchived': instance.isArchived,
   'createdAt': instance.createdAt.toIso8601String(),
+  'dayIds': instance.dayIds,
 };
