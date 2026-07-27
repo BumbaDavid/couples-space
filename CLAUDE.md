@@ -5,10 +5,12 @@ Project-level guidance for Claude Code working in this repository.
 ## What this project is
 
 A two-person Android app (Flutter + Firebase) for a couple to share notes between
-themselves and keep private notes for each user. Authoritative design lives in
+themselves, keep private notes, and track workouts. Authoritative design lives in
 [docs/superpowers/specs/2026-05-26-couples-notes-app-design.md](docs/superpowers/specs/2026-05-26-couples-notes-app-design.md).
-Read that spec before making non-trivial changes — it covers data model, pairing flow,
-screens, state management, and security rules in detail.
+Read that spec before making non-trivial changes to the notes/pairing side — it covers
+data model, pairing flow, screens, state management, and security rules in detail.
+The workout tracker design lives in
+[docs/design/design_feature_new/README.md](docs/design/design_feature_new/README.md).
 
 ## Stack
 
@@ -34,7 +36,15 @@ lib/
     ├── pairing/                   # invite-code generate / enter
     ├── shared_notes/              # shared notes list + editor
     ├── private_notes/             # per-user private notes
-    └── profile/                   # display name, theme mode, sign out
+    ├── profile/                   # display name, theme mode, sign out
+    └── workout/
+        ├── data/                  # models (Exercise, WorkoutEntry, WorkoutDay, WorkoutSet)
+        │   ├── workout_repository.dart
+        │   ├── workout_icons.dart # body-part list, icon map, isEndurance()
+        │   └── workout_date_utils.dart
+        ├── providers/             # workout_providers.dart
+        └── ui/                    # exercise_list, exercise_detail, add_entry,
+                                   # add_exercise, pick_exercises screens
 ```
 
 Each feature directory owns its UI, repository (Firestore wrapper), and Riverpod
@@ -51,6 +61,21 @@ it takes a repository as a parameter rather than knowing which kind of note it e
   spec).
 - Notes sort by `updatedAt` descending in lists.
 - Either partner can edit any shared note. `authorId` is for display only, not permission.
+
+### Workout feature paths
+
+- Exercises: `users/{userId}/exercises/{exerciseId}`
+- Workout entries: `users/{userId}/workoutEntries/{entryId}`
+- Workout days: `users/{userId}/days/{dayId}`
+- An exercise belongs to zero or more days via `dayIds: List<String>`. Use
+  `FieldValue.arrayUnion` / `FieldValue.arrayRemove` to update membership; query with
+  `arrayContains`. Old documents missing `dayIds` default to `[]` (backward compatible).
+- Exercise type (strength vs endurance) is derived from `bodyPart` via
+  `WorkoutIcons.isEndurance(bodyPart)` — no separate type field. Endurance body part is
+  `"Endurance"` (legacy Firestore docs may have `"Cardio"`; `isEndurance()` matches both).
+- Endurance entries have `durationMinutes` set and `sets` empty. Strength entries have
+  `sets` non-empty and `durationMinutes` null.
+- Endurance exercises are excluded from weekly progress stats (reps, volume).
 
 ## Security rules
 
@@ -121,3 +146,16 @@ flutter analyze                       # static analysis
 flutter test                          # unit tests
 firebase emulators:start              # run Auth + Firestore emulators locally
 ```
+
+### Distributing an update (Firebase App Distribution)
+
+```
+flutter build apk --release
+firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
+  --app 1:538976807059:android:aed5f6962c35be14414566 \
+  --release-notes "What changed" \
+  --testers "david.bumba0607@gmail.com,miruna.petrosanu@gmail.com"
+```
+
+Testers receive a push/email notification and install the update through the Firebase
+App Tester companion app. No Play Store required.

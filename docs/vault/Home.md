@@ -11,6 +11,8 @@ A running record of architectural decisions, context, and ideas for this project
 - [[ADR-005-pairing-flow]] — Two-phase self-healing pairing and why rules can't be loosened
 - [[ADR-006-freezed-data-classes]] — Why freezed + json_serializable, never raw Maps
 - [[ADR-007-peachy-design-system]] — Peachy visual direction, AppColors/AppTheme tokens, never raw hex
+- [[ADR-008-workout-tracker-data-model]] — Firestore paths, multi-day exercises, endurance type detection
+- [[ADR-009-firebase-app-distribution]] — How app updates are distributed to testers
 
 ## Sessions
 
