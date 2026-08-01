@@ -21,6 +21,7 @@ Start here when coming back after a gap → [[sessions/template]]
 ## Ideas
 
 Post-V1 features → [[ideas/post-v1]]
+Reminders feature spec → [[ideas/reminders-feature]]
 
 ## External references
 
