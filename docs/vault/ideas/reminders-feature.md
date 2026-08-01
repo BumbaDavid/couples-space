@@ -1,7 +1,9 @@
 # Feature idea: Personal reminders
 
 **Discussed:** 2026-07-28
-**Status:** Designed and spec'd — awaiting design handoff before implementation
+**Status:** ✅ Implemented and shipped in release 1.1.0 (2) on 2026-07-28.
+Implementation decisions and platform gotchas are recorded in [[ADR-010-local-reminders]].
+This note is kept as the record of *why* the feature is shaped the way it is.
 
 ## What it is
 
@@ -43,11 +45,15 @@ Opens the app to wherever the user last was. No deep-link to a specific screen (
   to a specific screen when tapped.
 - Syncing reminders across devices via Firestore.
 
-## Implementation gotcha (for future reference)
-Android clears all locally scheduled notifications when the phone reboots. The app
-must re-schedule all active reminders on launch (and ideally via a boot broadcast
-receiver). `flutter_local_notifications` supports this but it needs to be wired up
-explicitly — easy to miss.
+## Implementation gotchas (anticipated vs. actual)
 
-Android 13+ also requires the `POST_NOTIFICATIONS` runtime permission. The app must
-request it before scheduling the first notification and handle denial gracefully.
+Anticipated before building, and both real:
+- Android clears scheduled notifications on reboot — handled by `rescheduleAll()` on
+  launch plus a boot receiver.
+- Android 13+ requires the `POST_NOTIFICATIONS` runtime permission.
+
+The one that actually broke it was **not** on this list: `flutter_local_notifications`
+does not declare its own broadcast receivers, so the app must declare them in
+`AndroidManifest.xml`. Without them the alarm fires and the notification is dropped
+silently — no notification, no log entry. See [[ADR-010-local-reminders]] for the full
+set of silent failure modes and how to diagnose them with `adb dumpsys`.

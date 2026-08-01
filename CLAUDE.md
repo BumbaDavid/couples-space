@@ -5,12 +5,15 @@ Project-level guidance for Claude Code working in this repository.
 ## What this project is
 
 A two-person Android app (Flutter + Firebase) for a couple to share notes between
-themselves, keep private notes, and track workouts. Authoritative design lives in
+themselves, keep private notes, track workouts, and set personal reminders.
+Authoritative design lives in
 [docs/superpowers/specs/2026-05-26-couples-notes-app-design.md](docs/superpowers/specs/2026-05-26-couples-notes-app-design.md).
 Read that spec before making non-trivial changes to the notes/pairing side — it covers
 data model, pairing flow, screens, state management, and security rules in detail.
 The workout tracker design lives in
 [docs/design/design_feature_new/README.md](docs/design/design_feature_new/README.md).
+The reminders design lives in
+[docs/design/design_reminder/README.md](docs/design/design_reminder/README.md).
 
 ## Stack
 
@@ -21,6 +24,9 @@ The workout tracker design lives in
 - **go_router** for routing.
 - **freezed** + **json_serializable** for immutable data classes.
 - **google_fonts** for Baloo 2 (headings) and Quicksand (body/labels).
+- **flutter_local_notifications** + **timezone** + **flutter_timezone** for reminders
+  (on-device scheduling only — no FCM, no Blaze plan).
+- **shared_preferences** for the reminders' local storage.
 
 ## Project layout (feature-first)
 
@@ -37,6 +43,12 @@ lib/
     ├── shared_notes/              # shared notes list + editor
     ├── private_notes/             # per-user private notes
     ├── profile/                   # display name, theme mode, sign out
+    ├── reminders/                 # local recurring notifications (no Firestore)
+    │   ├── data/                  # reminder.dart (freezed model + repeatLabel)
+    │   │   ├── notification_service.dart   # flutter_local_notifications wrapper
+    │   │   └── reminder_repository.dart    # shared_preferences CRUD + stream
+    │   ├── providers/             # reminder_providers.dart
+    │   └── ui/                    # reminders_list, reminder_editor screens
     └── workout/
         ├── data/                  # models (Exercise, WorkoutEntry, WorkoutDay, WorkoutSet)
         │   ├── workout_repository.dart
@@ -50,6 +62,12 @@ lib/
 Each feature directory owns its UI, repository (Firestore wrapper), and Riverpod
 providers. The note-editor UI is shared between `shared_notes` and `private_notes` —
 it takes a repository as a parameter rather than knowing which kind of note it edits.
+`reminders/` is the one exception to "repository == Firestore wrapper": it is backed by
+`shared_preferences`, not Firestore.
+
+The bottom nav (`core/widgets/home_shell.dart`) is a **horizontally scrollable** custom
+bar, not a Material `NavigationBar` — tab count is expected to keep growing, and a fixed
+bar shrinks items to fit. Add new tabs to the `_tabs` list and the `_body()` switch.
 
 ## Data model invariants
 
@@ -76,6 +94,44 @@ it takes a repository as a parameter rather than knowing which kind of note it e
 - Endurance entries have `durationMinutes` set and `sets` empty. Strength entries have
   `sets` non-empty and `durationMinutes` null.
 - Endurance exercises are excluded from weekly progress stats (reps, volume).
+
+### Reminders — local only, never Firestore
+
+- Reminders are stored **on-device** in `shared_preferences` under the key `reminders`
+  (a `List<String>` of JSON blobs). They are per-user, never shared with the partner,
+  and are lost on uninstall / clear-data. This is deliberate — do not "improve" it by
+  syncing to Firestore without asking.
+- A reminder is `{id, message, hour, minute, days: List<bool> (len 7, 0=Mon), enabled}`.
+  `message` is both the list label and the notification title.
+- All reminders repeat **weekly** on the selected days. There is no fire-once option.
+- One OS notification is scheduled per selected weekday, id =
+  `(reminderId.hashCode & 0xFFFFFF) * 10 + dayIndex`. Changing that formula orphans
+  every already-scheduled alarm.
+- `ReminderRepository` mutations must keep prefs and the OS alarms in sync — every
+  create/update/delete/toggle calls `NotificationService.syncReminder` or
+  `cancelReminder`.
+
+## Android notification requirements (easy to break)
+
+These are load-bearing. Removing any of them breaks reminders **silently** — the alarm
+fires, nothing appears, and nothing is logged.
+
+- `AndroidManifest.xml` **must** declare `ScheduledNotificationReceiver` and
+  `ScheduledNotificationBootReceiver`. `flutter_local_notifications` does *not* declare
+  them itself; without them a fired alarm has no receiver to broadcast to.
+- The notification channel is created explicitly in `NotificationService.init()`.
+  Posting to a channel that doesn't exist is silently dropped on Android 8+.
+- Permissions: `POST_NOTIFICATIONS` (runtime, Android 13+), `SCHEDULE_EXACT_ALARM`
+  (granted only via a Settings screen, Android 12+), `RECEIVE_BOOT_COMPLETED`.
+- Android clears scheduled alarms on reboot, so `main.dart` re-arms everything via
+  `reminderRepository.rescheduleAll()` at startup; the boot receiver covers the rest.
+- `isCoreLibraryDesugaringEnabled = true` plus the `desugar_jdk_libs` dependency in
+  `android/app/build.gradle.kts` are required by the plugin.
+- **Force-stopping the app cancels all its alarms** (Android policy). They come back the
+  next time the app is opened. Nothing to fix — just know it when debugging.
+
+To verify scheduling on a device:
+`adb shell dumpsys alarm | grep -A2 ScheduledNotificationReceiver`
 
 ## Security rules
 
@@ -125,9 +181,15 @@ Specifically:
 
 ## Things deferred to post-V1 — do not add them speculatively
 
-- iOS support, push notifications (FCM + Cloud Functions, Blaze plan), photo uploads
-  (Firebase Storage), markdown rendering, accent-color / font customization, shared
-  todos / calendar / love-notes, soft delete / undo, unpair flow, group sharing >2 members.
+- iOS support, **server-sent push** notifications (FCM + Cloud Functions, Blaze plan),
+  photo uploads (Firebase Storage), markdown rendering, accent-color / font
+  customization, shared todos / calendar / love-notes, soft delete / undo, unpair flow,
+  group sharing >2 members.
+- Reminders specifically: deep-linking a notification tap to a screen (e.g. "log your
+  workout" → exercise list), and syncing reminders across devices via Firestore.
+
+Note: *local* notifications are shipped (the reminders feature). It is only **FCM /
+server-pushed** notifications that remain deferred — those are what need the Blaze plan.
 
 If a task seems to require one of these, ask first — it likely means scope has expanded
 beyond V1.
@@ -148,6 +210,9 @@ firebase emulators:start              # run Auth + Firestore emulators locally
 ```
 
 ### Distributing an update (Firebase App Distribution)
+
+Bump `version:` in `pubspec.yaml` first — reusing a version leaves two releases
+indistinguishable in the tester app. (`1.0.0+1` → workouts, `1.1.0+2` → reminders.)
 
 ```
 flutter build apk --release

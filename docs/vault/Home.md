@@ -13,6 +13,7 @@ A running record of architectural decisions, context, and ideas for this project
 - [[ADR-007-peachy-design-system]] — Peachy visual direction, AppColors/AppTheme tokens, never raw hex
 - [[ADR-008-workout-tracker-data-model]] — Firestore paths, multi-day exercises, endurance type detection
 - [[ADR-009-firebase-app-distribution]] — How app updates are distributed to testers
+- [[ADR-010-local-reminders]] — Local notifications without a server, and the silent failure modes
 
 ## Sessions
 
@@ -21,7 +22,7 @@ Start here when coming back after a gap → [[sessions/template]]
 ## Ideas
 
 Post-V1 features → [[ideas/post-v1]]
-Reminders feature spec → [[ideas/reminders-feature]]
+Reminders feature spec → [[ideas/reminders-feature]] (shipped — see [[ADR-010-local-reminders]])
 
 ## External references
 
