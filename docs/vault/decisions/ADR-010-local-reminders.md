@@ -1,6 +1,6 @@
 # ADR-010: Local reminders (notifications without a server)
 
-**Date:** 2026-07-28
+**Date:** 2026-08-01
 **Status:** Accepted — shipped in release 1.1.0 (2)
 
 ## Decision

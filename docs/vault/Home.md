@@ -23,6 +23,7 @@ Start here when coming back after a gap → [[sessions/template]]
 
 Post-V1 features → [[ideas/post-v1]]
 Reminders feature spec → [[ideas/reminders-feature]] (shipped — see [[ADR-010-local-reminders]])
+Protein tracker spec → [[ideas/protein-tracker-feature]] (scoped, design in progress)
 
 ## External references
 

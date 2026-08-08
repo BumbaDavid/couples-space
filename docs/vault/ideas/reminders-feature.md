@@ -1,7 +1,7 @@
 # Feature idea: Personal reminders
 
-**Discussed:** 2026-07-28
-**Status:** ✅ Implemented and shipped in release 1.1.0 (2) on 2026-07-28.
+**Discussed:** 2026-08-01
+**Status:** ✅ Implemented and shipped in release 1.1.0 (2) on 2026-08-01.
 Implementation decisions and platform gotchas are recorded in [[ADR-010-local-reminders]].
 This note is kept as the record of *why* the feature is shaped the way it is.
 
