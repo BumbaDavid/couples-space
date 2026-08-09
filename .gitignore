@@ -49,6 +49,11 @@ app.*.map.json
 *.jks
 *.keystore
 
+# Local secrets (API keys, tokens) — never commit
+.env
+.env.*
+!.env.example
+
 # Obsidian local settings (vault notes are committed, settings are not)
 docs/vault/.obsidian/
 

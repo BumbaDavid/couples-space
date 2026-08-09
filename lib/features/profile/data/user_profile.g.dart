@@ -14,6 +14,7 @@ _UserProfile _$UserProfileFromJson(Map<String, dynamic> json) => _UserProfile(
   themeMode:
       $enumDecodeNullable(_$AppThemeModeEnumMap, json['themeMode']) ??
       AppThemeMode.system,
+  proteinTargetGrams: (json['proteinTargetGrams'] as num?)?.toInt() ?? 110,
   createdAt: DateTime.parse(json['createdAt'] as String),
 );
 
@@ -24,6 +25,7 @@ Map<String, dynamic> _$UserProfileToJson(_UserProfile instance) =>
       'displayName': instance.displayName,
       'coupleId': instance.coupleId,
       'themeMode': _$AppThemeModeEnumMap[instance.themeMode]!,
+      'proteinTargetGrams': instance.proteinTargetGrams,
       'createdAt': instance.createdAt.toIso8601String(),
     };
 

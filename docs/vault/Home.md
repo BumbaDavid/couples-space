@@ -15,6 +15,10 @@ A running record of architectural decisions, context, and ideas for this project
 - [[ADR-009-firebase-app-distribution]] — How app updates are distributed to testers
 - [[ADR-010-local-reminders]] — Local notifications without a server, and the silent failure modes
 
+## Guides
+
+Obsidian MCP server setup → [[guides/obsidian-mcp-setup]]
+
 ## Sessions
 
 Start here when coming back after a gap → [[sessions/template]]
@@ -23,9 +27,11 @@ Start here when coming back after a gap → [[sessions/template]]
 
 Post-V1 features → [[ideas/post-v1]]
 Reminders feature spec → [[ideas/reminders-feature]] (shipped — see [[ADR-010-local-reminders]])
-Protein tracker spec → [[ideas/protein-tracker-feature]] (scoped, design in progress)
+Protein tracker spec → [[ideas/protein-tracker-feature]] (designed — engineering spec written 2026-08-08, in build)
 
 ## External references
 
 - [Spec](../superpowers/specs/2026-05-26-couples-notes-app-design.md)
 - [Implementation plan](../superpowers/plans/2026-05-26-couples-notes-app.md)
+- [Protein tracker — engineering design](../superpowers/specs/2026-08-08-protein-tracker-design.md)
+- [Protein tracker — design handoff](../design/protein_tracker_export/README.md)

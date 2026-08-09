@@ -18,6 +18,20 @@ class AppColors {
   static const failText = Color(0xFFC25B3A);
   static const failBg = Color(0xFFFBE0D3);
 
+  /// Deeper coral for the protein ring's overfill arc and entry gram figures.
+  /// Not a warning colour — the protein feature must never signal failure.
+  static const overfill = Color(0xFFE07A54);
+
+  /// Muted tint for empty-state icons.
+  static const subtle = Color(0xFFD9C4B6);
+
+  /// Track behind a two-segment pill switcher.
+  static const switcherTrack = Color(0xFFF3E8DF);
+
+  /// Text and action colours on a dark toast (toast background is [text]).
+  static const onToast = Color(0xFFFFF6EF);
+  static const onToastAction = Color(0xFFF5B79A);
+
   /// Five pastel tile colors cycled by list index: `tilePalette[i % 5]`.
   static const List<({Color background, Color iconColor})> tilePalette = [
     (background: Color(0xFFFBE0D3), iconColor: Color(0xFFE07A54)), // peach
@@ -43,6 +57,20 @@ class AppTheme {
     color: Color(0x52E07A54), // rgba(224,122,84,0.32)
     blurRadius: 22,
     offset: Offset(0, 10),
+  );
+
+  /// Lift under a dark toast.
+  static const toastShadow = BoxShadow(
+    color: Color(0x474B3A33), // rgba(75,58,51,0.28)
+    blurRadius: 26,
+    offset: Offset(0, 10),
+  );
+
+  /// Subtle lift under the active segment of a pill switcher.
+  static const switcherShadow = BoxShadow(
+    color: Color(0x1AB4785A), // rgba(180,120,90,0.10)
+    blurRadius: 6,
+    offset: Offset(0, 2),
   );
 
   static ThemeData light() => ThemeData(

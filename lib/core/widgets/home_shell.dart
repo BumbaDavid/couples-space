@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../features/private_notes/ui/private_notes_screen.dart';
 import '../../features/profile/ui/profile_screen.dart';
+import '../../features/protein/ui/protein_progress_screen.dart';
+import '../../features/protein/ui/protein_screen.dart';
+import '../../features/protein/ui/widgets/protein_common.dart';
 import '../../features/reminders/ui/reminders_list_screen.dart';
 import '../../features/shared_notes/ui/shared_notes_screen.dart';
 import '../../features/workout/ui/exercise_list_screen.dart';
@@ -17,14 +20,20 @@ class HomeShell extends StatefulWidget {
 }
 
 class _HomeShellState extends State<HomeShell> {
-  int _mainIndex = 0; // 0=Shared 1=Private 2=Workouts 3=Reminders 4=Profile
+  // 0=Shared 1=Private 2=Workouts 3=Reminders 4=Protein 5=Profile
+  // Profile stays last: new feature tabs are inserted before it, never after.
+  int _mainIndex = 0;
   int _workoutTab = 0; // 0=Exercises 1=Progress (only used when _mainIndex==2)
+  int _proteinTab = 0; // 0=Protein 1=Progress (only used when _mainIndex==4)
 
   static const _tabs = [
     _NavTab(icon: Icons.people, label: 'Shared'),
     _NavTab(icon: Icons.person, label: 'Private'),
     _NavTab(icon: Icons.fitness_center, label: 'Workouts'),
     _NavTab(icon: Icons.notifications, label: 'Reminders'),
+    // The design names Material Symbols `nutrition`, which has no Flutter
+    // `Icons` equivalent — see protein_icons.dart.
+    _NavTab(icon: Icons.restaurant_menu, label: 'Protein'),
     _NavTab(icon: Icons.settings, label: 'Profile'),
   ];
 
@@ -35,9 +44,34 @@ class _HomeShellState extends State<HomeShell> {
             ? const ExerciseListScreen()
             : const ProgressScreen(),
         3 => const RemindersListScreen(),
-        4 => const ProfileScreen(),
+        4 => _proteinBody(),
+        5 => const ProfileScreen(),
         _ => const SharedNotesScreen(),
       };
+
+  /// Unlike Workouts, the Protein tab keeps the scrollable bottom nav visible
+  /// and puts its own two-segment switcher inside the screen — so it needs no
+  /// "Home" segment to escape back to the other tabs.
+  Widget _proteinBody() => SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+              child: PillSwitcher(
+                labels: const ['Protein', 'Progress'],
+                selectedIndex: _proteinTab,
+                onSelected: (i) => setState(() => _proteinTab = i),
+              ),
+            ),
+            Expanded(
+              child: _proteinTab == 0
+                  ? const ProteinScreen()
+                  : const ProteinProgressScreen(),
+            ),
+          ],
+        ),
+      );
 
   Widget _navBar() {
     if (_mainIndex == 2) {

@@ -32,6 +32,12 @@ service cloud.firestore {
       match /sharedNotes/{noteId} {
         allow read, write: if isCoupleMember(coupleId);
       }
+
+      // Shared food catalog for the protein tracker. Food facts are shared
+      // knowledge; the log built from them is private (see proteinLog below).
+      match /foods/{foodId} {
+        allow read, write: if isCoupleMember(coupleId);
+      }
     }
 
     match /users/{userId}/privateNotes/{noteId} {
@@ -47,6 +53,13 @@ service cloud.firestore {
     }
 
     match /users/{userId}/days/{dayId} {
+      allow read, write: if isSelf(userId);
+    }
+
+    // Protein log. Self-only, with no cross-partner read — deliberately
+    // stricter than users/{userId} itself, which a paired partner CAN read.
+    // Never relax this: the whole feature depends on the log being private.
+    match /users/{userId}/proteinLog/{entryId} {
       allow read, write: if isSelf(userId);
     }
 

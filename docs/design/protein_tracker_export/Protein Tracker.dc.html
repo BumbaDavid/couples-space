@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  button, input { font-family: inherit; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="min-height:100%;display:flex;align-items:flex-start;justify-content:center;background:#EDE7E0;padding:20px 0">
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="412" height="892" style="width:412px;height:892px;flex:0 0 auto" hint-size="412px,892px">
+<div style="height:100%;min-height:0;display:flex;flex-direction:column;background:#FBF3EC;font-family:'Quicksand', sans-serif;color:#4B3A33;overflow:hidden;position:relative">
+
+  <!-- ══════════════ S1 · PROTEIN ══════════════ -->
+  <sc-if value="{{isMain}}" hint-placeholder-val="{{ true }}">
+  <div style="height:100%;min-height:0;display:flex;flex-direction:column">
+
+    <div style="flex-shrink:0;padding:18px 20px 0">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-family:'Quicksand';font-size:12px;font-weight:800;letter-spacing:1.6px;color:#A99184;text-transform:uppercase">Protein</div>
+          <h1 style="margin:5px 0 0;font-family:'Baloo 2', sans-serif;font-size:29px;font-weight:600;color:#4B3A33">{{dayTitle}}</h1>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+          <button onClick="{{prevDay}}" style="width:38px;height:38px;border:none;cursor:pointer;border-radius:14px;background:#F6E7DC;color:#9A6B4E;display:flex;align-items:center;justify-content:center">
+            <span style="font-family:'Material Symbols Outlined';font-size:21px">chevron_left</span>
+          </button>
+          <button onClick="{{nextDay}}" style="width:38px;height:38px;border:none;cursor:pointer;border-radius:14px;background:#F6E7DC;color:#9A6B4E;opacity:{{nextDayOpacity}};display:flex;align-items:center;justify-content:center">
+            <span style="font-family:'Material Symbols Outlined';font-size:21px">chevron_right</span>
+          </button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:6px;background:#F3E8DF;border-radius:100px;padding:4px;margin-top:14px">
+        <div style="flex:1;text-align:center;padding:9px 0;border-radius:100px;background:#FFFFFF;box-shadow:0 2px 6px rgba(180,120,90,0.10);font-family:'Quicksand';font-size:13px;font-weight:800;color:#4B3A33">Protein</div>
+        <button onClick="{{goProgress}}" style="flex:1;border:none;background:none;cursor:pointer;padding:9px 0;border-radius:100px;font-family:'Quicksand';font-size:13px;font-weight:800;color:#A99184">Progress</button>
+      </div>
+    </div>
+
+    <div style="flex:1;min-height:0;overflow:auto;padding:14px 20px 24px">
+
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div style="position:relative;width:196px;height:196px">
+          <svg viewBox="0 0 196 196" style="width:196px;height:196px;transform:rotate(-90deg)">
+            <circle cx="98" cy="98" r="82" fill="none" stroke="#FBE0D3" stroke-width="17"></circle>
+            <circle cx="98" cy="98" r="82" fill="none" stroke="#EF9270" stroke-width="17" stroke-linecap="round" stroke-dasharray="{{ringDash}}" stroke-dashoffset="0" stroke-opacity="{{ringOpacity}}"></circle>
+            <circle cx="98" cy="98" r="82" fill="none" stroke="#E07A54" stroke-width="17" stroke-linecap="round" stroke-dasharray="{{overDash}}" stroke-dashoffset="0" stroke-opacity="{{overOpacity}}"></circle>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div style="display:flex;align-items:baseline;gap:3px">
+              <span style="font-family:'Baloo 2', sans-serif;font-size:52px;font-weight:700;color:#4B3A33;line-height:1">{{total}}</span>
+              <span style="font-family:'Baloo 2', sans-serif;font-size:22px;font-weight:600;color:#A99184">g</span>
+            </div>
+            <div style="font-family:'Quicksand';font-size:13px;font-weight:700;color:#A99184;margin-top:4px">logged {{dayWord}}</div>
+          </div>
+        </div>
+
+        <button onClick="{{goTarget}}" style="margin-top:12px;border:none;cursor:pointer;background:#F6E7DC;color:#9A6B4E;font-family:'Quicksand';font-size:13px;font-weight:800;padding:9px 16px;border-radius:100px;display:flex;align-items:center;gap:6px">
+          <span style="font-family:'Material Symbols Outlined';font-size:17px">flag</span>Target {{target}}g
+        </button>
+      </div>
+
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin:24px 2px 11px">
+        <div style="font-family:'Quicksand';font-size:12px;font-weight:800;letter-spacing:1.2px;color:#A99184;text-transform:uppercase">Log into</div>
+        <button onClick="{{goCards}}" style="border:none;background:none;cursor:pointer;font-family:'Quicksand';font-size:13px;font-weight:800;color:#9A6B4E;padding:0">Edit cards</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(5, 1fr);gap:7px;margin-bottom:14px">
+        <sc-for list="{{logSlotChoices}}" as="s" hint-placeholder-count="5">
+          <button onClick="{{s.onPick}}" style="border:none;cursor:pointer;font-family:'Quicksand';font-size:11px;font-weight:800;padding:10px 2px 9px;border-radius:16px;background:{{s.bg}};color:{{s.fg}};box-shadow:{{s.shadow}};display:flex;flex-direction:column;align-items:center;gap:4px">
+            <span style="font-family:'Material Symbols Outlined';font-size:19px">{{s.icon}}</span>{{s.short}}
+          </button>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{noCards}}">
+        <div style="background:#FFFFFF;border-radius:26px;box-shadow:0 8px 22px rgba(180,120,90,0.13);padding:30px 22px;text-align:center">
+          <span style="font-family:'Material Symbols Outlined';font-size:42px;color:#EF9270">restaurant</span>
+          <div style="font-family:'Baloo 2', sans-serif;font-size:18px;font-weight:600;color:#4B3A33;margin-top:9px">Let's make your first card</div>
+          <div style="font-family:'Quicksand';font-size:14px;font-weight:700;color:#A99184;margin-top:6px;line-height:1.45">Cards are the foods you eat often. One tap logs them.</div>
+          <button onClick="{{newCard}}" style="margin-top:16px;border:none;cursor:pointer;background:#EF9270;color:#fff;font-family:'Baloo 2', sans-serif;font-size:16px;font-weight:600;padding:13px 24px;border-radius:100px;box-shadow:0 10px 22px rgba(224,122,84,0.32)">Create a card</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{hasCards}}">
+      <div style="display:flex;gap:11px;overflow-x:auto;padding:2px 2px 6px;margin:0 -20px;padding-left:20px;padding-right:20px">
+        <sc-for list="{{cards}}" as="c" hint-placeholder-count="5">
+          <button onClick="{{c.onLog}}" style="flex:0 0 98px;border:none;cursor:pointer;background:#FFFFFF;border-radius:22px;box-shadow:0 8px 22px rgba(180,120,90,0.13);padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:8px">
+            <div style="width:50px;height:50px;border-radius:50%;background:{{c.tileBg}};display:flex;align-items:center;justify-content:center">
+              <span style="font-family:'Material Symbols Outlined';font-size:27px;color:{{c.tileFg}}">{{c.icon}}</span>
+            </div>
+            <div style="font-family:'Baloo 2', sans-serif;font-size:14px;font-weight:600;color:#4B3A33;line-height:1.2;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{c.name}}</div>
+            <div style="font-family:'Quicksand';font-size:12px;font-weight:800;color:#9A6B4E;background:#F6E7DC;padding:3px 10px;border-radius:100px">{{c.gramsLabel}}</div>
+          </button>
+        </sc-for>
+        <button onClick="{{newCard}}" style="flex:0 0 98px;border:2px dashed #F0E4DA;cursor:pointer;background:none;border-radius:22px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#A99184">
+          <span style="font-family:'Material Symbols Outlined';font-size:26px">add</span>
+          <span style="font-family:'Quicksand';font-size:12px;font-weight:800">New card</span>
+        </button>
+      </div>
+      </sc-if>
+
+      <div style="font-family:'Quicksand';font-size:12px;font-weight:800;letter-spacing:1.2px;color:#A99184;text-transform:uppercase;margin:24px 2px 11px">{{logHeading}}</div>
+
+      <sc-if value="{{dayEmpty}}">
+        <div style="background:#FFFFFF;border-radius:26px;box-shadow:0 8px 22px rgba(180,120,90,0.13);padding:30px 22px;text-align:center">
+          <span style="font-family:'Material Symbols Outlined';font-size:40px;color:#D9C4B6">bookmark_border</span>
+          <div style="font-family:'Baloo 2', sans-serif;font-size:17px;font-weight:600;color:#4B3A33;margin-top:9px">Nothing here yet</div>
+          <div style="font-family:'Quicksand';font-size:14px;font-weight:700;color:#A99184;margin-top:5px;line-height:1.45">{{emptyDayCopy}}</div>
+        </div>
+      </sc-if>
+
+      <sc-for list="{{slotGroups}}" as="g" hint-placeholder-count="2">
+        <div style="margin-bottom:18px">
+          <div style="display:flex;align-items:center;gap:7px;padding:0 4px 9px">
+            <span style="font-family:'Material Symbols Outlined';font-size:17px;color:#A99184">{{g.icon}}</span>
+            <span style="font-family:'Quicksand';font-size:12px;font-weight:800;letter-spacing:0.8px;color:#A99184;text-transform:uppercase">{{g.label}}</span>
+            <div style="flex:1;height:1px;background:#F0E4DA"></div>
+            <span style="font-family:'Quicksand';font-size:12px;font-weight:800;color:#A99184">{{g.sum}}</span>
+          </div>
+          <sc-for list="{{g.entries}}" as="e" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:4px;background:#FFFFFF;border-radius:18px;box-shadow:0 8px 22px rgba(180,120,90,0.13);padding:12px 10px 12px 14px;margin-bottom:10px">
+              <button onClick="{{e.onEdit}}" style="flex:1;min-width:0;border:none;background:none;cursor:pointer;display:flex;align-items:center;gap:13px;padding:0;text-align:left">
+                <div style="width:44px;height:44px;flex-shrink:0;border-radius:50%;background:{{e.tileBg}};display:flex;align-items:center;justify-content:center">
+                  <span style="font-family:'Material Symbols Outlined';font-size:24px;color:{{e.tileFg}}">{{e.icon}}</span>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;align-items:center;gap:7px">
+                    <span style="font-family:'Baloo 2', sans-serif;font-size:16px;font-weight:600;color:#4B3A33;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{e.name}}</span>
+                    <sc-if value="{{e.isRepeat}}">
+                      <span style="flex-shrink:0;font-family:'Quicksand';font-size:12px;font-weight:800;color:#9A6B4E;background:#F6E7DC;padding:2px 8px;border-radius:100px">{{e.repeat}}</span>
+                    </sc-if>
+                  </div>
+                  <div style="font-family:'Quicksand';font-size:12px;font-weight:700;color:#A99184;margin-top:1px">{{e.slotLabel}}</div>
+                </div>
+                <div style="font-family:'Baloo 2', sans-serif;font-size:18px;font-weight:700;color:#E07A54;flex-shrink:0">{{e.gramsLabel}}</div>
+              </button>
+              <button onClick="{{e.onRemove}}" style="width:44px;height:44px;flex-shrink:0;border:none;background:none;cursor:pointer;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#A99184">
+                <span style="font-family:'Material Symbols Outlined';font-size:21px">{{e.removeIcon}}</span>
+              </button>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{hasToast}}">
+      <div style="position:absolute;left:16px;right:16px;bottom:82px;background:#4B3A33;border-radius:18px;padding:13px 15px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 26px rgba(75,58,51,0.28)">
+        <span style="font-family:'Material Symbols Outlined';font-size:20px;color:#FBE0D3">check_circle</span>
+        <span style="flex:1;min-width:0;font-family:'Quicksand';font-size:14px;font-weight:700;color:#FFF6EF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{toastText}}</span>
+        <button onClick="{{undo}}" style="border:none;background:none;cursor:pointer;font-family:'Quicksand';font-size:13px;font-weight:800;color:#F5B79A;padding:2px 4px;flex-shrink:0">Undo</button>
+      </div>
+    </sc-if>
+
+    <div style="flex-shrink:0;background:#FFFFFF;border-top:1px solid #F0E4DA">
+      <div style="display:flex;overflow-x:auto;padding:10px 8px 12px;gap:2px">
+        <sc-for list="{{navTabs}}" as="n" hint-placeholder-count="6">
+          <div style="flex:0 0 84px;display:flex;flex-direction:column;align-items:center;gap:3px;color:{{n.color}}">
+            <span style="font-family:'Material Symbols Outlined';font-size:25px">{{n.icon}}</span>
+            <span style="font-family:'Quicksand';font-size:12px;font-weight:800;white-space:nowrap">{{n.label}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ══════════════ S2 · PROGRESS ══════════════ -->
+  <sc-if value="{{isProgress}}">
+  <div style="height:100%;min-height:0;display:flex;flex-direction:column">
+    <div style="flex-shrink:0;padding:18px 20px 0">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-family:'Quicksand';font-size:12px;font-weight:800;letter-spacing:1.6px;color:#A99184;text-transform:uppercase">Protein</div>
+          <h1 style="margin:5px 0 0;font-family:'Baloo 2', sans-serif;font-size:29px;font-weight:600;color:#4B3A33">{{weekTitle}}</h1>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+          <button onClick="{{prevWeek}}" style="width:38px;height:38px;border:none;cursor:pointer;border-radius:14px;background:#F6E7DC;color:#9A6B4E;display:flex;align-items:center;justify-content:center">
+            <span style="font-family:'Material Symbols Outlined';font-size:21px">chevron_left</span>
+          </button>
+          <button onClick="{{nextWeek}}" style="width:38px;height:38px;border:none;cursor:pointer;border-radius:14px;background:#F6E7DC;color:#9A6B4E;opacity:{{nextWeekOpacity}};display:flex;align-items:center;justify-content:center">
+            <span style="font-family:'Material Symbols Outlined';font-size:21px">chevron_right</span>
+          </button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:6px;background:#F3E8DF;border-radius:100px;padding:4px;margin-top:14px">
+        <button onClick="{{goMain}}" style="flex:1;border:none;background:none;cursor:pointer;padding:9px 0;border-radius:100px;font-family:'Quicksand';font-size:13px;font-weight:800;color:#A99184">Protein</button>
+        <div style="flex:1;text-align:center;padding:9px 0;border-radius:100px;background:#FFFFFF;box-shadow:0 2px 6px rgba(180,120,90,0.10);font-family:'Quicksand';font-size:13px;font-weight:800;color:#4B3A33">Progress</div>
+      </div>
+    </div>
+
+    <div style="flex:1;min-height:0;overflow:auto;padding:16px 20px 24px">
+
+      <sc-if value="{{weekEmpty}}">
+        <div style="background:#FFFFFF;border-radius:26px;box-shadow:0 8px 22px rgba(180,120,90,0.13);padding:34px 24px;text-align:center">
+          <span style="font-family:'Material Symbols Outlined';font-size:42px;color:#D9C4B6">insights</span>
+          <div style="font-family:'Baloo 2', sans-serif;font-size:18px;font-weight:600;color:#4B3A33;margin-top:9px">Nothing logged this week</div>
+          <div style="font-family:'Quicksand';font-size:14px;font-weight:700;color:#A99184;margin-top:6px;line-height:1.45">Whenever you log something, it'll show up here.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{weekHasData}}">
+        <div style="background:#FBE0D3;border-radius:26px;padding:22px;text-align:center">
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:4px">
+            <span style="font-family:'Baloo 2', sans-serif;font-size:46px;font-weight:700;color:#4B3A33;line-height:1">{{avg}}</span>
+            <span style="font-family:'Baloo 2', sans-serif;font-size:21px;font-weight:600;color:#9A6B4E">g</span>
+          </div>
+          <div style="font-family:'Quicksand';font-size:14px;font-weight:700;color:#9A6B4E;margin-top:7px;line-height:1.45">average across {{daysLoggedLabel}}</div>
+        </div>
+
+        <div style="background:#FFFFFF;border-radius:26px;box-shadow:0 8px 22px rgba(180,120,90,0.13);padding:20px;margin-top:14px">
+          <div style="font-family:'Baloo 2', sans-serif;font-size:16px;font-weight:600;color:#4B3A33;margin-bottom:16px">Each day</div>
+          <div style="display:flex;align-items:flex-end;gap:9px;height:132px">
+            <sc-for list="{{weekBars}}" as="b" hint-placeholder-count="7">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:7px">
+                <div style="font-family:'Quicksand';font-size:11px;font-weight:800;color:#A99184;opacity:{{b.valueOpacity}}">{{b.value}}</div>
+                <div style="width:100%;height:{{b.h}}%;min-height:6px;background:{{b.color}};border-radius:8px 8px 5px 5px"></div>
+                <span style="font-family:'Quicksand';font-size:12px;font-weight:800;color:#A99184">{{b.d}}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF;border-radius:26px;box-shadow:0 8px 22px rgba(180,120,90,0.13);padding:18px 20px;margin-top:14px;display:flex;align-items:center;gap:14px">
+          <span style="font-family:'Material Symbols Outlined';font-size:30px;color:#EF9270">local_florist</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-family:'Baloo 2', sans-serif;font-size:16px;font-weight:600;color:#4B3A33">{{weekTotalLabel}}</div>
+            <div style="font-family:'Quicksand';font-size:13px;font-weight:700;color:#A99184;margin-top:1px">across the whole week</div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="flex-shrink:0;background:#FFFFFF;border-top:1px solid #F0E4DA">
+      <div style="display:flex;overflow-x:auto;padding:10px 8px 12px;gap:2px">
+        <sc-for list="{{navTabs}}" as="n" hint-placeholder-count="6">
+          <div style="flex:0 0 84px;display:flex;flex-direction:column;align-items:center;gap:3px;color:{{n.color}}">
+            <span style="font-family:'Material Symbols Outlined';font-size:25px">{{n.icon}}</span>
+            <span style="font-family:'Quicksand';font-size:12px;font-weight:800;white-space:nowrap">{{n.label}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ══════════════ S3 · FOOD CARDS ══════════════ -->
+  <sc-if value="{{isCards}}">
+  <div style="height:100%;min-height:0;display:flex;flex-direction:column">
+    <div style="flex-shrink:0;display:flex;align-items:center;gap:6px;padding:14px 14px 6px">
+      <button onClick="{{goMain}}" style="width:42px;height:42px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#4B3A33">
+        <span style="font-family:'Material Symbols Outlined';font-size:26px">arrow_back</span>
+      </button>
+    </div>
+    <div style="flex:1;min-height:0;overflow:auto;padding:6px 20px 20px">
+      <h1 style="margin:0 0 5px;font-family:'Baloo 2', sans-serif;font-size:28px;font-weight:600;color:#4B3A33">Food cards</h1>
+      <div style="font-family:'Quicksand';font-size:13px;font-weight:700;color:#A99184;margin-bottom:18px">Shared between you both.</div>
+
+      <sc-if value="{{noCards}}">
+        <div style="background:#FFFFFF;border-radius:26px;box-shadow:0 8px 22px rgba(180,120,90,0.13);padding:34px 24px;text-align:center">
+          <span style="font-family:'Material Symbols Outlined';font-size:42px;color:#EF9270">restaurant</span>
+          <div style="font-family:'Baloo 2', sans-serif;font-size:18px;font-weight:600;color:#4B3A33;margin-top:9px">No cards yet</div>
+          <div style="font-family:'Quicksand';font-size:14px;font-weight:700;color:#A99184;margin-top:6px;line-height:1.45">Start with something you eat most days.</div>
+        </div>
+      </sc-if>
+
+      <sc-for list="{{cards}}" as="c" hint-placeholder-count="5">
+        <button onClick="{{c.onEdit}}" style="width:100%;border:none;cursor:pointer;display:flex;align-items:center;gap:13px;background:#FFFFFF;border-radius:18px;box-shadow:0 8px 22px rgba(180,120,90,0.13);padding:12px 14px;margin-bottom:10px;text-align:left">
+          <div style="width:46px;height:46px;flex-shrink:0;border-radius:50%;background:{{c.tileBg}};display:flex;align-items:center;justify-content:center">
+            <span style="font-family:'Material Symbols Outlined';font-size:25px;color:{{c.tileFg}}">{{c.icon}}</span>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-family:'Baloo 2', sans-serif;font-size:16px;font-weight:600;color:#4B3A33;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{c.name}}</div>
+            <div style="font-family:'Quicksand';font-size:12px;font-weight:700;color:#A99184;margin-top:1px">{{c.gramsLabel}} protein</div>
+          </div>
+          <span style="font-family:'Material Symbols Outlined';font-size:22px;color:#A99184;flex-shrink:0">edit</span>
+        </button>
+      </sc-for>
+    </div>
+    <div style="flex-shrink:0;padding:14px 20px 20px">
+      <button onClick="{{newCard}}" style="width:100%;border:none;cursor:pointer;background:#EF9270;color:#fff;font-family:'Baloo 2', sans-serif;font-size:17px;font-weight:600;padding:16px;border-radius:18px;box-shadow:0 10px 22px rgba(224,122,84,0.32);display:flex;align-items:center;justify-content:center;gap:8px">
+        <span style="font-family:'Material Symbols Outlined';font-size:22px">add</span>New card
+      </button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ══════════════ S3b · CARD FORM ══════════════ -->
+  <sc-if value="{{isCardForm}}">
+  <div style="height:100%;min-height:0;display:flex;flex-direction:column">
+    <div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:14px 14px 6px">
+      <button onClick="{{goCards}}" style="width:42px;height:42px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#4B3A33">
+        <span style="font-family:'Material Symbols Outlined';font-size:26px">arrow_back</span>
+      </button>
+      <sc-if value="{{cardIsExisting}}">
+        <button onClick="{{deleteCard}}" style="border:none;background:none;cursor:pointer;padding:9px 12px;border-radius:100px;font-family:'Quicksand';font-size:13px;font-weight:800;color:#9A6B4E;display:flex;align-items:center;gap:5px">
+          <span style="font-family:'Material Symbols Outlined';font-size:19px">delete</span>Delete
+        </button>
+      </sc-if>
+    </div>
+    <div style="flex:1;min-height:0;overflow:auto;padding:6px 22px 20px">
+      <h1 style="margin:0 0 20px;font-family:'Baloo 2', sans-serif;font-size:28px;font-weight:600;color:#4B3A33">{{cardFormTitle}}</h1>
+
+      <div style="display:flex;justify-content:center;margin-bottom:22px">
+        <div style="width:92px;height:92px;border-radius:50%;background:{{cardPreviewBg}};display:flex;align-items:center;justify-content:center">
+          <span style="font-family:'Material Symbols Outlined';font-size:46px;color:{{cardPreviewFg}}">{{cf.icon}}</span>
+        </div>
+      </div>
+
+      <div style="font-family:'Quicksand';font-size:13px;font-weight:800;letter-spacing:0.6px;color:#A99184;text-transform:uppercase;margin-bottom:8px">Name</div>
+      <input value="{{cf.name}}" onInput="{{setCardName}}" placeholder="e.g. Whey shake" style="width:100%;border:none;outline:none;background:#FFFFFF;border-radius:18px;box-shadow:0 8px 22px rgba(180,120,90,0.13);padding:15px 16px;font-family:'Baloo 2', sans-serif;font-size:17px;font-weight:600;color:#4B3A33" />
+
+      <div style="font-family:'Quicksand';font-size:13px;font-weight:800;letter-spacing:0.6px;color:#A99184;text-transform:uppercase;margin:22px 0 10px">Protein</div>
+      <div style="background:#FFFFFF;border-radius:18px;box-shadow:0 8px 22px rgba(180,120,90,0.13);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+        <button onClick="{{cardGramsDown}}" style="width:46px;height:46px;border:none;cursor:pointer;border-radius:16px;background:#F6E7DC;color:#9A6B4E;display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:26px">remove</span></button>
+        <div style="display:flex;align-items:baseline;gap:3px">
+          <span style="font-family:'Baloo 2', sans-serif;font-size:40px;font-weight:700;color:#4B3A33">{{cf.grams}}</span>
+          <span style="font-family:'Baloo 2', sans-serif;font-size:19px;font-weight:600;color:#A99184">g</span>
+        </div>
+        <button onClick="{{cardGramsUp}}" style="width:46px;height:46px;border:none;cursor:pointer;border-radius:16px;background:#EF9270;color:#fff;display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:26px">add</span></button>
+      </div>
+
+      <div style="font-family:'Quicksand';font-size:13px;font-weight:800;letter-spacing:0.6px;color:#A99184;text-transform:uppercase;margin:22px 0 10px">Icon</div>
+      <div style="display:grid;grid-template-columns:repeat(5, 1fr);gap:9px">
+        <sc-for list="{{iconChoices}}" as="i" hint-placeholder-count="20">
+          <button onClick="{{i.onPick}}" style="border:none;cursor:pointer;aspect-ratio:1;border-radius:16px;background:{{i.bg}};color:{{i.fg}};box-shadow:{{i.shadow}};display:flex;align-items:center;justify-content:center">
+            <span style="font-family:'Material Symbols Outlined';font-size:24px">{{i.name}}</span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="flex-shrink:0;padding:14px 22px 20px">
+      <button onClick="{{saveCard}}" style="width:100%;border:none;cursor:pointer;background:#EF9270;color:#fff;font-family:'Baloo 2', sans-serif;font-size:17px;font-weight:600;padding:16px;border-radius:18px;box-shadow:0 10px 22px rgba(224,122,84,0.32)">{{cardSaveLabel}}</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ══════════════ S4 · EDIT ENTRY ══════════════ -->
+  <sc-if value="{{isEditEntry}}">
+  <div style="height:100%;min-height:0;display:flex;flex-direction:column">
+    <div style="flex-shrink:0;display:flex;align-items:center;gap:6px;padding:14px 14px 6px">
+      <button onClick="{{goMain}}" style="width:42px;height:42px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#4B3A33">
+        <span style="font-family:'Material Symbols Outlined';font-size:26px">arrow_back</span>
+      </button>
+    </div>
+    <div style="flex:1;min-height:0;overflow:auto;padding:6px 22px 20px">
+      <div style="display:flex;align-items:center;gap:13px;margin-bottom:22px">
+        <div style="width:58px;height:58px;flex-shrink:0;border-radius:50%;background:{{ee.tileBg}};display:flex;align-items:center;justify-content:center">
+          <span style="font-family:'Material Symbols Outlined';font-size:30px;color:{{ee.tileFg}}">{{ee.icon}}</span>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h1 style="margin:0;font-family:'Baloo 2', sans-serif;font-size:26px;font-weight:600;color:#4B3A33;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ee.name}}</h1>
+          <div style="font-family:'Quicksand';font-size:13px;font-weight:700;color:#A99184;margin-top:2px">{{editEntryDay}}</div>
+        </div>
+      </div>
+
+      <div style="font-family:'Quicksand';font-size:13px;font-weight:800;letter-spacing:0.6px;color:#A99184;text-transform:uppercase;margin-bottom:10px">Amount each</div>
+      <div style="background:#FFFFFF;border-radius:18px;box-shadow:0 8px 22px rgba(180,120,90,0.13);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+        <button onClick="{{entryGramsDown}}" style="width:46px;height:46px;border:none;cursor:pointer;border-radius:16px;background:#F6E7DC;color:#9A6B4E;display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:26px">remove</span></button>
+        <div style="display:flex;align-items:baseline;gap:3px">
+          <span style="font-family:'Baloo 2', sans-serif;font-size:40px;font-weight:700;color:#4B3A33">{{ee.unit}}</span>
+          <span style="font-family:'Baloo 2', sans-serif;font-size:19px;font-weight:600;color:#A99184">g</span>
+        </div>
+        <button onClick="{{entryGramsUp}}" style="width:46px;height:46px;border:none;cursor:pointer;border-radius:16px;background:#EF9270;color:#fff;display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:26px">add</span></button>
+      </div>
+
+      <div style="font-family:'Quicksand';font-size:13px;font-weight:800;letter-spacing:0.6px;color:#A99184;text-transform:uppercase;margin:22px 0 10px">How many</div>
+      <div style="background:#FFFFFF;border-radius:18px;box-shadow:0 8px 22px rgba(180,120,90,0.13);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+        <button onClick="{{entryCountDown}}" style="width:46px;height:46px;border:none;cursor:pointer;border-radius:16px;background:#F6E7DC;color:#9A6B4E;display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:26px">remove</span></button>
+        <div style="display:flex;align-items:baseline;gap:3px">
+          <span style="font-family:'Baloo 2', sans-serif;font-size:19px;font-weight:600;color:#A99184">×</span>
+          <span style="font-family:'Baloo 2', sans-serif;font-size:40px;font-weight:700;color:#4B3A33">{{ee.count}}</span>
+        </div>
+        <button onClick="{{entryCountUp}}" style="width:46px;height:46px;border:none;cursor:pointer;border-radius:16px;background:#EF9270;color:#fff;display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:26px">add</span></button>
+      </div>
+      <div style="font-family:'Quicksand';font-size:13px;font-weight:700;color:#A99184;margin-top:10px;padding-left:4px">{{eeTotalLabel}}</div>
+
+      <div style="font-family:'Quicksand';font-size:13px;font-weight:800;letter-spacing:0.6px;color:#A99184;text-transform:uppercase;margin:22px 0 10px">Time of day</div>
+      <div style="display:flex;flex-wrap:wrap;gap:9px">
+        <sc-for list="{{slotChoices}}" as="s" hint-placeholder-count="5">
+          <button onClick="{{s.onPick}}" style="border:none;cursor:pointer;font-family:'Quicksand';font-size:14px;font-weight:700;padding:10px 16px;border-radius:100px;background:{{s.bg}};color:{{s.fg}};box-shadow:{{s.shadow}};display:flex;align-items:center;gap:6px">
+            <span style="font-family:'Material Symbols Outlined';font-size:18px">{{s.icon}}</span>{{s.label}}
+          </button>
+        </sc-for>
+      </div>
+
+      <button onClick="{{removeEntry}}" style="width:100%;margin-top:26px;border:none;cursor:pointer;background:#F6E7DC;color:#9A6B4E;font-family:'Quicksand';font-size:15px;font-weight:800;padding:15px;border-radius:18px;display:flex;align-items:center;justify-content:center;gap:8px">
+        <span style="font-family:'Material Symbols Outlined';font-size:20px">backspace</span>Take this off the list
+      </button>
+    </div>
+    <div style="flex-shrink:0;padding:14px 22px 20px">
+      <button onClick="{{saveEntry}}" style="width:100%;border:none;cursor:pointer;background:#EF9270;color:#fff;font-family:'Baloo 2', sans-serif;font-size:17px;font-weight:600;padding:16px;border-radius:18px;box-shadow:0 10px 22px rgba(224,122,84,0.32)">Save changes</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ══════════════ TARGET ══════════════ -->
+  <sc-if value="{{isTarget}}">
+  <div style="height:100%;min-height:0;display:flex;flex-direction:column">
+    <div style="flex-shrink:0;display:flex;align-items:center;gap:6px;padding:14px 14px 6px">
+      <button onClick="{{goMain}}" style="width:42px;height:42px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#4B3A33">
+        <span style="font-family:'Material Symbols Outlined';font-size:26px">arrow_back</span>
+      </button>
+    </div>
+    <div style="flex:1;min-height:0;overflow:auto;padding:6px 22px 20px">
+      <h1 style="margin:0 0 6px;font-family:'Baloo 2', sans-serif;font-size:28px;font-weight:600;color:#4B3A33">Daily target</h1>
+      <div style="font-family:'Quicksand';font-size:14px;font-weight:700;color:#A99184;line-height:1.45;margin-bottom:22px">Just a marker for the ring to fill toward. Yours only — change it whenever you like.</div>
+
+      <div style="background:#FFFFFF;border-radius:26px;box-shadow:0 8px 22px rgba(180,120,90,0.13);padding:24px 20px;display:flex;align-items:center;justify-content:space-between">
+        <button onClick="{{targetDown}}" style="width:52px;height:52px;border:none;cursor:pointer;border-radius:18px;background:#F6E7DC;color:#9A6B4E;display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:28px">remove</span></button>
+        <div style="display:flex;align-items:baseline;gap:3px">
+          <span style="font-family:'Baloo 2', sans-serif;font-size:52px;font-weight:700;color:#4B3A33">{{draftTarget}}</span>
+          <span style="font-family:'Baloo 2', sans-serif;font-size:22px;font-weight:600;color:#A99184">g</span>
+        </div>
+        <button onClick="{{targetUp}}" style="width:52px;height:52px;border:none;cursor:pointer;border-radius:18px;background:#EF9270;color:#fff;display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:28px">add</span></button>
+      </div>
+    </div>
+    <div style="flex-shrink:0;padding:14px 22px 20px">
+      <button onClick="{{saveTarget}}" style="width:100%;border:none;cursor:pointer;background:#EF9270;color:#fff;font-family:'Baloo 2', sans-serif;font-size:17px;font-weight:600;padding:16px;border-radius:18px;box-shadow:0 10px 22px rgba(224,122,84,0.32)">Save target</button>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:452,&quot;height&quot;:932}}">
+class Component extends DCLogic {
+  TILES = [
+    { bg:'#FBE0D3', fg:'#E07A54' }, { bg:'#E7EEDD', fg:'#7FA05B' },
+    { bg:'#FCE7C8', fg:'#D69A3E' }, { bg:'#F6DDE0', fg:'#D06A82' },
+    { bg:'#DDEAEA', fg:'#5E9A9A' },
+  ];
+  SLOTS = [
+    { key:'morning',   label:'Morning',   short:'Morning', icon:'wb_twilight' },
+    { key:'noon',      label:'Noon',      short:'Noon',    icon:'light_mode' },
+    { key:'afternoon', label:'Afternoon', short:'Aft.',    icon:'wb_sunny' },
+    { key:'evening',   label:'Evening',   short:'Evening', icon:'nights_stay' },
+    { key:'night',     label:'Night',     short:'Night',   icon:'bedtime' },
+  ];
+  ICONS = ['egg','egg_alt','set_meal','rice_bowl','ramen_dining','lunch_dining',
+    'dinner_dining','bakery_dining','kebab_dining','local_pizza','local_drink',
+    'local_cafe','blender','cookie','icecream','nutrition','restaurant','fastfood',
+    'agriculture','grocery'];
+  DOW = ['M','T','W','T','F','S','S'];
+
+  state = {
+    screen: 'main',
+    dayOffset: 0,
+    weekOffset: 0,
+    target: 110,
+    draftTarget: 110,
+    editingCardId: null,
+    cf: { name:'', grams:20, icon:'egg' },
+    editingEntryId: null,
+    ee: null,
+    logSlot: null,
+    toast: null,
+    nextId: 100,
+    cards: [
+      { id:1, name:'Eggs',        grams:12, icon:'egg' },
+      { id:2, name:'Whey shake',  grams:24, icon:'blender' },
+      { id:3, name:'Chicken',     grams:31, icon:'set_meal' },
+      { id:4, name:'Greek yog',   grams:17, icon:'icecream' },
+      { id:5, name:'Lentil bowl', grams:18, icon:'rice_bowl' },
+      { id:6, name:'Oat latte',   grams:8,  icon:'local_cafe' },
+    ],
+    entries: [
+      { id:1, day:0,  cardId:1, name:'Eggs',       icon:'egg',        unit:12, count:2, slot:'morning' },
+      { id:2, day:0,  cardId:6, name:'Oat latte',  icon:'local_cafe', unit:8,  count:1, slot:'morning' },
+      { id:3, day:0,  cardId:3, name:'Chicken',    icon:'set_meal',   unit:31, count:1, slot:'noon' },
+      { id:4, day:-1, cardId:2, name:'Whey shake', icon:'blender',    unit:24, count:1, slot:'morning' },
+      { id:5, day:-1, cardId:3, name:'Chicken',    icon:'set_meal',   unit:31, count:1, slot:'evening' },
+      { id:6, day:-1, cardId:4, name:'Greek yog',  icon:'icecream',   unit:17, count:1, slot:'night' },
+      { id:7, day:-2, cardId:5, name:'Lentil bowl',icon:'rice_bowl',  unit:18, count:1, slot:'noon' },
+      { id:8, day:-2, cardId:1, name:'Eggs',       icon:'egg',        unit:12, count:1, slot:'morning' },
+      { id:9, day:-4, cardId:2, name:'Whey shake', icon:'blender',    unit:24, count:1, slot:'afternoon' },
+      { id:10,day:-4, cardId:3, name:'Chicken',    icon:'set_meal',   unit:31, count:1, slot:'evening' },
+    ],
+  };
+
+  componentWillUnmount(){ if (this._t) clearTimeout(this._t); }
+
+  tileFor(i){ return this.TILES[i % this.TILES.length]; }
+  cardIndex(id){ return Math.max(0, this.state.cards.findIndex(c => c.id === id)); }
+  slotMeta(key){ return this.SLOTS.find(s => s.key === key) || this.SLOTS[0]; }
+
+  currentSlot(){
+    const h = new Date().getHours();
+    if (h < 11) return 'morning';
+    if (h < 14) return 'noon';
+    if (h < 17) return 'afternoon';
+    if (h < 21) return 'evening';
+    return 'night';
+  }
+
+  dateFor(offset){
+    const d = new Date();
+    d.setHours(12,0,0,0);
+    d.setDate(d.getDate() + offset);
+    return d;
+  }
+
+  go(screen){ this.setState({ screen }); }
+
+  logCard(card){
+    if (this._t) clearTimeout(this._t);
+    this.setState(s => {
+      const slot = s.logSlot || this.currentSlot();
+      const match = s.entries.find(e => e.day === s.dayOffset && e.slot === slot &&
+        e.cardId === card.id && e.unit === card.grams);
+      const label = this.slotMeta(slot).label.toLowerCase();
+      if (match){
+        return {
+          entries: s.entries.map(e => e.id === match.id ? { ...e, count: e.count + 1 } : e),
+          toast: { id: match.id, merged: true,
+            text: card.name + ' ×' + (match.count + 1) + ' in ' + label },
+        };
+      }
+      const id = s.nextId + 1;
+      return {
+        nextId: id,
+        entries: [ ...s.entries, { id, day:s.dayOffset, cardId:card.id, name:card.name,
+          icon:card.icon, unit:card.grams, count:1, slot } ],
+        toast: { id, merged: false, text: card.name + ' · ' + card.grams + 'g into ' + label },
+      };
+    });
+    this._t = setTimeout(() => this.setState({ toast:null }), 4000);
+  }
+  pickLogSlot(slot){ this.setState({ logSlot: slot }); }
+  // one tap off: decrement a repeated row, remove it at the last one
+  decrementEntry(id){
+    if (this._t) clearTimeout(this._t);
+    this.setState(s => ({ toast:null, entries: s.entries.flatMap(e => {
+      if (e.id !== id) return [e];
+      return e.count > 1 ? [{ ...e, count: e.count - 1 }] : [];
+    }) }));
+  }
+  undo(){
+    if (this._t) clearTimeout(this._t);
+    this.setState(s => {
+      if (!s.toast) return { toast:null };
+      const id = s.toast.id;
+      return { toast:null, entries: s.entries.flatMap(e => {
+        if (e.id !== id) return [e];
+        return e.count > 1 ? [{ ...e, count: e.count - 1 }] : [];
+      }) };
+    });
+  }
+
+  shiftDay(d){
+    this.setState(s => ({ dayOffset: Math.min(0, s.dayOffset + d), toast:null }));
+  }
+  shiftWeek(d){
+    this.setState(s => ({ weekOffset: Math.min(0, s.weekOffset + d) }));
+  }
+
+  openTarget(){ this.setState(s => ({ screen:'target', draftTarget:s.target })); }
+  bumpTarget(d){ this.setState(s => ({ draftTarget: Math.max(20, Math.min(300, s.draftTarget + d)) })); }
+  saveTarget(){ this.setState(s => ({ target:s.draftTarget, screen:'main' })); }
+
+  newCard(){ this.setState({ screen:'cardForm', editingCardId:null, cf:{ name:'', grams:20, icon:'egg' } }); }
+  editCard(c){ this.setState({ screen:'cardForm', editingCardId:c.id, cf:{ name:c.name, grams:c.grams, icon:c.icon } }); }
+  setCardName(e){ const v = e.target.value; this.setState(s => ({ cf:{ ...s.cf, name:v } })); }
+  bumpCardGrams(d){ this.setState(s => ({ cf:{ ...s.cf, grams: Math.max(1, Math.min(120, s.cf.grams + d)) } })); }
+  pickCardIcon(icon){ this.setState(s => ({ cf:{ ...s.cf, icon } })); }
+  saveCard(){
+    this.setState(s => {
+      const name = (s.cf.name || '').trim() || 'New food';
+      if (s.editingCardId){
+        return { screen:'cards',
+          cards: s.cards.map(c => c.id === s.editingCardId ? { ...c, ...s.cf, name } : c) };
+      }
+      const id = Math.max(0, ...s.cards.map(c => c.id)) + 1;
+      return { screen:'cards', cards:[ ...s.cards, { id, ...s.cf, name } ] };
+    });
+  }
+  deleteCard(){
+    this.setState(s => ({ screen:'cards', cards: s.cards.filter(c => c.id !== s.editingCardId) }));
+  }
+
+  editEntry(e){ this.setState({ screen:'editEntry', editingEntryId:e.id, ee:{ ...e } }); }
+  bumpEntryGrams(d){ this.setState(s => ({ ee:{ ...s.ee, unit: Math.max(1, Math.min(200, s.ee.unit + d)) } })); }
+  bumpEntryCount(d){ this.setState(s => ({ ee:{ ...s.ee, count: Math.max(1, Math.min(20, s.ee.count + d)) } })); }
+  pickSlot(slot){ this.setState(s => ({ ee:{ ...s.ee, slot } })); }
+  saveEntry(){
+    this.setState(s => ({ screen:'main',
+      entries: s.entries.map(e => e.id === s.editingEntryId ? { ...e, unit:s.ee.unit, count:s.ee.count, slot:s.ee.slot } : e) }));
+  }
+  removeEntry(){
+    this.setState(s => ({ screen:'main', entries: s.entries.filter(e => e.id !== s.editingEntryId) }));
+  }
+
+  renderVals(){
+    const s = this.state;
+    const CIRC = 2 * Math.PI * 82;
+
+    const cards = s.cards.map((c,i) => {
+      const t = this.tileFor(i);
+      return { ...c, tileBg:t.bg, tileFg:t.fg, gramsLabel: c.grams + 'g',
+        onLog: () => this.logCard(c), onEdit: () => this.editCard(c) };
+    });
+
+    // ---- day ----
+    const dayEntries = s.entries.filter(e => e.day === s.dayOffset);
+    const gramsOf = (e) => e.unit * e.count;
+    const total = dayEntries.reduce((a,e) => a + gramsOf(e), 0);
+    const pct = Math.min(1, total / s.target);
+    const over = Math.max(0, Math.min(1, (total - s.target) / s.target));
+    const dash = (f) => (CIRC * f).toFixed(1) + ' ' + CIRC.toFixed(1);
+
+    const slotGroups = this.SLOTS.map(sl => {
+      const list = dayEntries.filter(e => e.slot === sl.key).map(e => {
+        const t = this.tileFor(this.cardIndex(e.cardId));
+        return { ...e, tileBg:t.bg, tileFg:t.fg, gramsLabel: gramsOf(e) + 'g',
+          slotLabel: e.count > 1 ? (sl.label + ' · ' + e.unit + 'g each') : sl.label,
+          repeat: '×' + e.count, isRepeat: e.count > 1,
+          removeIcon: e.count > 1 ? 'remove' : 'backspace',
+          onEdit: () => this.editEntry(e),
+          onRemove: () => this.decrementEntry(e.id) };
+      });
+      return { ...sl, entries:list, sum: list.reduce((a,e) => a + gramsOf(e), 0) + 'g',
+        show: list.length > 0 };
+    }).filter(g => g.show);
+
+    const d = this.dateFor(s.dayOffset);
+    const dateStr = d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+    const dayTitle = s.dayOffset === 0 ? 'Today' : (s.dayOffset === -1 ? 'Yesterday' : dateStr);
+    const dayWord = s.dayOffset === 0 ? 'today' : (s.dayOffset === -1 ? 'yesterday' : 'that day');
+
+    // ---- week ----
+    const anchor = this.dateFor(s.weekOffset * 7);
+    const dow = (anchor.getDay() + 6) % 7;
+    const monday = new Date(anchor); monday.setDate(anchor.getDate() - dow);
+    const today0 = this.dateFor(0);
+    const dayMs = 86400000;
+    const offsetOf = (dt) => Math.round((dt - today0) / dayMs);
+
+    const weekDays = [];
+    for (let i = 0; i < 7; i++){
+      const dt = new Date(monday); dt.setDate(monday.getDate() + i);
+      const off = offsetOf(dt);
+      const v = s.entries.filter(e => e.day === off).reduce((a,e) => a + gramsOf(e), 0);
+      weekDays.push({ d:this.DOW[i], v, future: off > 0 });
+    }
+    const loggedDays = weekDays.filter(w => w.v > 0);
+    const weekTotal = loggedDays.reduce((a,w) => a + w.v, 0);
+    const avg = loggedDays.length ? Math.round(weekTotal / loggedDays.length) : 0;
+    const maxV = Math.max(1, ...weekDays.map(w => w.v));
+    const weekBars = weekDays.map(w => ({
+      d: w.d,
+      h: w.v > 0 ? Math.round(w.v / maxV * 100) : 0,
+      color: w.v > 0 ? '#EF9270' : '#F0E4DA',
+      value: w.v > 0 ? w.v : '',
+      valueOpacity: w.v > 0 ? 1 : 0,
+    }));
+    const mLabel = monday.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+    const sun = new Date(monday); sun.setDate(monday.getDate() + 6);
+    const sLabel = sun.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+
+    // ---- forms ----
+    const cfTile = this.tileFor(s.editingCardId ? this.cardIndex(s.editingCardId) : s.cards.length);
+    const iconChoices = this.ICONS.map(name => {
+      const active = name === s.cf.icon;
+      return { name, bg: active ? '#EF9270' : '#F6E7DC', fg: active ? '#FFFFFF' : '#9A6B4E',
+        shadow: active ? '0 6px 14px rgba(224,122,84,0.32)' : 'none',
+        onPick: () => this.pickCardIcon(name) };
+    });
+
+    const ee = s.ee || { name:'', icon:'egg', unit:0, count:1, slot:'morning' };
+    const eeTile = s.ee ? this.tileFor(this.cardIndex(ee.cardId)) : this.TILES[0];
+    const slotChoices = this.SLOTS.map(sl => {
+      const active = sl.key === ee.slot;
+      return { ...sl, bg: active ? '#EF9270' : '#F6E7DC', fg: active ? '#FFFFFF' : '#9A6B4E',
+        shadow: active ? '0 6px 14px rgba(224,122,84,0.32)' : 'none',
+        onPick: () => this.pickSlot(sl.key) };
+    });
+    const eeDay = s.ee ? this.dateFor(ee.day) : d;
+
+    const activeLogSlot = s.logSlot || this.currentSlot();
+    const logSlotChoices = this.SLOTS.map(sl => {
+      const active = sl.key === activeLogSlot;
+      return { ...sl, bg: active ? '#EF9270' : '#F6E7DC', fg: active ? '#FFFFFF' : '#9A6B4E',
+        shadow: active ? '0 6px 14px rgba(224,122,84,0.32)' : 'none',
+        onPick: () => this.pickLogSlot(sl.key) };
+    });
+
+    const navTabs = [
+      { label:'Shared',   icon:'sticky_note_2',   color:'#A99184' },
+      { label:'Private',  icon:'lock',            color:'#A99184' },
+      { label:'Workouts', icon:'fitness_center',  color:'#A99184' },
+      { label:'Reminders',icon:'notifications',   color:'#A99184' },
+      { label:'Profile',  icon:'person',          color:'#A99184' },
+      { label:'Protein',  icon:'nutrition',       color:'#EF9270' },
+    ];
+
+    return {
+      isMain: s.screen === 'main', isProgress: s.screen === 'progress',
+      isCards: s.screen === 'cards', isCardForm: s.screen === 'cardForm',
+      isEditEntry: s.screen === 'editEntry', isTarget: s.screen === 'target',
+      navTabs,
+
+      total, target: s.target, dayTitle, dayWord,
+      ringDash: dash(pct), overDash: dash(over),
+      ringOpacity: pct > 0 ? 1 : 0, overOpacity: over > 0 ? 1 : 0,
+      nextDayOpacity: s.dayOffset < 0 ? 1 : 0.35,
+      slotGroups, dayEmpty: dayEntries.length === 0,
+      logHeading: s.dayOffset === 0 ? "Today's log" : 'The log',
+      emptyDayCopy: s.dayOffset === 0
+        ? 'Tap a card above whenever you eat something.'
+        : 'Nothing was logged on this day.',
+
+      cards, hasCards: s.cards.length > 0, noCards: s.cards.length === 0,
+      logSlotChoices,
+
+      weekTitle: s.weekOffset === 0 ? 'This week' : (mLabel + ' – ' + sLabel),
+      nextWeekOpacity: s.weekOffset < 0 ? 1 : 0.35,
+      weekBars, avg,
+      daysLoggedLabel: loggedDays.length + (loggedDays.length === 1 ? ' day logged' : ' days logged'),
+      weekTotalLabel: weekTotal + 'g altogether',
+      weekEmpty: loggedDays.length === 0, weekHasData: loggedDays.length > 0,
+
+      cf: s.cf, iconChoices,
+      cardPreviewBg: cfTile.bg, cardPreviewFg: cfTile.fg,
+      cardIsExisting: !!s.editingCardId,
+      cardFormTitle: s.editingCardId ? 'Edit card' : 'New food card',
+      cardSaveLabel: s.editingCardId ? 'Save changes' : 'Create card',
+
+      ee: { ...ee, tileBg:eeTile.bg, tileFg:eeTile.fg },
+      eeTotalLabel: (ee.unit * ee.count) + 'g altogether',
+      eeIsRepeat: ee.count > 1,
+      slotChoices,
+      editEntryDay: eeDay.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' }),
+
+      draftTarget: s.draftTarget,
+      hasToast: !!s.toast, toastText: s.toast ? s.toast.text : '',
+
+      goMain: () => this.go('main'), goProgress: () => this.go('progress'),
+      goCards: () => this.go('cards'), goTarget: () => this.openTarget(),
+      prevDay: () => this.shiftDay(-1), nextDay: () => this.shiftDay(1),
+      prevWeek: () => this.shiftWeek(-1), nextWeek: () => this.shiftWeek(1),
+      undo: () => this.undo(),
+      newCard: () => this.newCard(), saveCard: () => this.saveCard(),
+      deleteCard: () => this.deleteCard(), setCardName: (e) => this.setCardName(e),
+      cardGramsUp: () => this.bumpCardGrams(1), cardGramsDown: () => this.bumpCardGrams(-1),
+      entryGramsUp: () => this.bumpEntryGrams(1), entryGramsDown: () => this.bumpEntryGrams(-1),
+      entryCountUp: () => this.bumpEntryCount(1), entryCountDown: () => this.bumpEntryCount(-1),
+      saveEntry: () => this.saveEntry(), removeEntry: () => this.removeEntry(),
+      targetUp: () => this.bumpTarget(5), targetDown: () => this.bumpTarget(-5),
+      saveTarget: () => this.saveTarget(),
+    };
+  }
+}
+</script>
+</body>
+</html>

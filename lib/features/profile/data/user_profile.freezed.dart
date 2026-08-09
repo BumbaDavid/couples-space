@@ -15,7 +15,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserProfile {
 
- String get id; String get email; String get displayName; String? get coupleId; AppThemeMode get themeMode; DateTime get createdAt;
+ String get id; String get email; String get displayName; String? get coupleId; AppThemeMode get themeMode;/// Daily protein target in grams. Per-user; edited on the protein screen,
+/// not in Profile. `@Default` lets user documents written before this
+/// feature decode without a migration.
+ int get proteinTargetGrams; DateTime get createdAt;
 /// Create a copy of UserProfile
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +31,16 @@ $UserProfileCopyWith<UserProfile> get copyWith => _$UserProfileCopyWithImpl<User
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfile&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.coupleId, coupleId) || other.coupleId == coupleId)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfile&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.coupleId, coupleId) || other.coupleId == coupleId)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.proteinTargetGrams, proteinTargetGrams) || other.proteinTargetGrams == proteinTargetGrams)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,displayName,coupleId,themeMode,createdAt);
+int get hashCode => Object.hash(runtimeType,id,email,displayName,coupleId,themeMode,proteinTargetGrams,createdAt);
 
 @override
 String toString() {
-  return 'UserProfile(id: $id, email: $email, displayName: $displayName, coupleId: $coupleId, themeMode: $themeMode, createdAt: $createdAt)';
+  return 'UserProfile(id: $id, email: $email, displayName: $displayName, coupleId: $coupleId, themeMode: $themeMode, proteinTargetGrams: $proteinTargetGrams, createdAt: $createdAt)';
 }
 
 
@@ -48,7 +51,7 @@ abstract mixin class $UserProfileCopyWith<$Res>  {
   factory $UserProfileCopyWith(UserProfile value, $Res Function(UserProfile) _then) = _$UserProfileCopyWithImpl;
 @useResult
 $Res call({
- String id, String email, String displayName, String? coupleId, AppThemeMode themeMode, DateTime createdAt
+ String id, String email, String displayName, String? coupleId, AppThemeMode themeMode, int proteinTargetGrams, DateTime createdAt
 });
 
 
@@ -65,14 +68,15 @@ class _$UserProfileCopyWithImpl<$Res>
 
 /// Create a copy of UserProfile
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? displayName = null,Object? coupleId = freezed,Object? themeMode = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? displayName = null,Object? coupleId = freezed,Object? themeMode = null,Object? proteinTargetGrams = null,Object? createdAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String,coupleId: freezed == coupleId ? _self.coupleId : coupleId // ignore: cast_nullable_to_non_nullable
 as String?,themeMode: null == themeMode ? _self.themeMode : themeMode // ignore: cast_nullable_to_non_nullable
-as AppThemeMode,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as AppThemeMode,proteinTargetGrams: null == proteinTargetGrams ? _self.proteinTargetGrams : proteinTargetGrams // ignore: cast_nullable_to_non_nullable
+as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }
@@ -158,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String displayName,  String? coupleId,  AppThemeMode themeMode,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String displayName,  String? coupleId,  AppThemeMode themeMode,  int proteinTargetGrams,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserProfile() when $default != null:
-return $default(_that.id,_that.email,_that.displayName,_that.coupleId,_that.themeMode,_that.createdAt);case _:
+return $default(_that.id,_that.email,_that.displayName,_that.coupleId,_that.themeMode,_that.proteinTargetGrams,_that.createdAt);case _:
   return orElse();
 
 }
@@ -179,10 +183,10 @@ return $default(_that.id,_that.email,_that.displayName,_that.coupleId,_that.them
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String displayName,  String? coupleId,  AppThemeMode themeMode,  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String displayName,  String? coupleId,  AppThemeMode themeMode,  int proteinTargetGrams,  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _UserProfile():
-return $default(_that.id,_that.email,_that.displayName,_that.coupleId,_that.themeMode,_that.createdAt);case _:
+return $default(_that.id,_that.email,_that.displayName,_that.coupleId,_that.themeMode,_that.proteinTargetGrams,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +203,10 @@ return $default(_that.id,_that.email,_that.displayName,_that.coupleId,_that.them
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String displayName,  String? coupleId,  AppThemeMode themeMode,  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String displayName,  String? coupleId,  AppThemeMode themeMode,  int proteinTargetGrams,  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _UserProfile() when $default != null:
-return $default(_that.id,_that.email,_that.displayName,_that.coupleId,_that.themeMode,_that.createdAt);case _:
+return $default(_that.id,_that.email,_that.displayName,_that.coupleId,_that.themeMode,_that.proteinTargetGrams,_that.createdAt);case _:
   return null;
 
 }
@@ -214,7 +218,7 @@ return $default(_that.id,_that.email,_that.displayName,_that.coupleId,_that.them
 @JsonSerializable()
 
 class _UserProfile implements UserProfile {
-  const _UserProfile({required this.id, required this.email, required this.displayName, this.coupleId, this.themeMode = AppThemeMode.system, required this.createdAt});
+  const _UserProfile({required this.id, required this.email, required this.displayName, this.coupleId, this.themeMode = AppThemeMode.system, this.proteinTargetGrams = 110, required this.createdAt});
   factory _UserProfile.fromJson(Map<String, dynamic> json) => _$UserProfileFromJson(json);
 
 @override final  String id;
@@ -222,6 +226,10 @@ class _UserProfile implements UserProfile {
 @override final  String displayName;
 @override final  String? coupleId;
 @override@JsonKey() final  AppThemeMode themeMode;
+/// Daily protein target in grams. Per-user; edited on the protein screen,
+/// not in Profile. `@Default` lets user documents written before this
+/// feature decode without a migration.
+@override@JsonKey() final  int proteinTargetGrams;
 @override final  DateTime createdAt;
 
 /// Create a copy of UserProfile
@@ -237,16 +245,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfile&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.coupleId, coupleId) || other.coupleId == coupleId)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfile&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.coupleId, coupleId) || other.coupleId == coupleId)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.proteinTargetGrams, proteinTargetGrams) || other.proteinTargetGrams == proteinTargetGrams)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,displayName,coupleId,themeMode,createdAt);
+int get hashCode => Object.hash(runtimeType,id,email,displayName,coupleId,themeMode,proteinTargetGrams,createdAt);
 
 @override
 String toString() {
-  return 'UserProfile(id: $id, email: $email, displayName: $displayName, coupleId: $coupleId, themeMode: $themeMode, createdAt: $createdAt)';
+  return 'UserProfile(id: $id, email: $email, displayName: $displayName, coupleId: $coupleId, themeMode: $themeMode, proteinTargetGrams: $proteinTargetGrams, createdAt: $createdAt)';
 }
 
 
@@ -257,7 +265,7 @@ abstract mixin class _$UserProfileCopyWith<$Res> implements $UserProfileCopyWith
   factory _$UserProfileCopyWith(_UserProfile value, $Res Function(_UserProfile) _then) = __$UserProfileCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String email, String displayName, String? coupleId, AppThemeMode themeMode, DateTime createdAt
+ String id, String email, String displayName, String? coupleId, AppThemeMode themeMode, int proteinTargetGrams, DateTime createdAt
 });
 
 
@@ -274,14 +282,15 @@ class __$UserProfileCopyWithImpl<$Res>
 
 /// Create a copy of UserProfile
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? displayName = null,Object? coupleId = freezed,Object? themeMode = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? displayName = null,Object? coupleId = freezed,Object? themeMode = null,Object? proteinTargetGrams = null,Object? createdAt = null,}) {
   return _then(_UserProfile(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String,coupleId: freezed == coupleId ? _self.coupleId : coupleId // ignore: cast_nullable_to_non_nullable
 as String?,themeMode: null == themeMode ? _self.themeMode : themeMode // ignore: cast_nullable_to_non_nullable
-as AppThemeMode,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as AppThemeMode,proteinTargetGrams: null == proteinTargetGrams ? _self.proteinTargetGrams : proteinTargetGrams // ignore: cast_nullable_to_non_nullable
+as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }
