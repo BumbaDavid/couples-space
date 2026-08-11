@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/theme.dart';
+import '../../../core/widgets/app_snack.dart';
 import '../data/workout_date_utils.dart';
 import '../data/workout_entry.dart';
 import '../data/workout_icons.dart';
@@ -112,6 +113,8 @@ class ExerciseDetailScreen extends ConsumerWidget {
                       _History(
                         entries: entries,
                         exerciseId: exerciseId,
+                        exerciseName: exercise.name,
+                        bodyPart: exercise.bodyPart,
                         isEndurance: isEndurance,
                       ),
                     ],
@@ -359,10 +362,14 @@ class _History extends ConsumerWidget {
   const _History({
     required this.entries,
     required this.exerciseId,
+    required this.exerciseName,
+    required this.bodyPart,
     required this.isEndurance,
   });
   final List<WorkoutEntry> entries;
   final String exerciseId;
+  final String exerciseName;
+  final String bodyPart;
   final bool isEndurance;
 
   @override
@@ -403,8 +410,18 @@ class _History extends ConsumerWidget {
           )
         else
           ...entries.map((entry) => isEndurance
-              ? _EnduranceEntryRow(entry: entry, exerciseId: exerciseId)
-              : _StrengthEntryRow(entry: entry, exerciseId: exerciseId)),
+              ? _EnduranceEntryRow(
+                  entry: entry,
+                  exerciseId: exerciseId,
+                  exerciseName: exerciseName,
+                  bodyPart: bodyPart,
+                )
+              : _StrengthEntryRow(
+                  entry: entry,
+                  exerciseId: exerciseId,
+                  exerciseName: exerciseName,
+                  bodyPart: bodyPart,
+                )),
       ],
     );
   }
@@ -413,10 +430,16 @@ class _History extends ConsumerWidget {
 // ── Strength entry row ─────────────────────────────────────────────────────
 
 class _StrengthEntryRow extends ConsumerWidget {
-  const _StrengthEntryRow(
-      {required this.entry, required this.exerciseId});
+  const _StrengthEntryRow({
+    required this.entry,
+    required this.exerciseId,
+    required this.exerciseName,
+    required this.bodyPart,
+  });
   final WorkoutEntry entry;
   final String exerciseId;
+  final String exerciseName;
+  final String bodyPart;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -432,52 +455,77 @@ class _StrengthEntryRow extends ConsumerWidget {
         direction: DismissDirection.endToStart,
         background: _deleteBackground(),
         confirmDismiss: (_) => _confirmDelete(context),
-        onDismissed: (_) => ref
-            .read(workoutRepositoryProvider)
-            .deleteEntry(exerciseId, entry.id),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: const [AppTheme.cardShadow],
-          ),
-          child: Row(
-            children: [
-              _DateTile(label: label),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '$setsCount set${setsCount == 1 ? '' : 's'} · $totalReps total reps',
-                      style: GoogleFonts.baloo2(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.text),
-                    ),
-                    Text(
-                      entry.sets.map((s) {
-                        final w =
-                            s.weight != null ? ' × ${s.weight}kg' : '';
-                        return '${s.reps}$w';
-                      }).join(', '),
-                      style: GoogleFonts.quicksand(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.muted),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
+        onDismissed: (_) {
+          final messenger = ScaffoldMessenger.of(context);
+          ref
+              .read(workoutRepositoryProvider)
+              .deleteEntry(exerciseId, entry.id)
+              .then((_) => AppSnack.showOn(messenger, 'Entry deleted'))
+              .catchError(
+                (_) => AppSnack.errorOn(messenger, "Couldn't delete that."),
+              );
+        },
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => AddEntryScreen(
+                exerciseId: exerciseId,
+                exerciseName: exerciseName,
+                bodyPart: bodyPart,
+                existing: entry,
               ),
-              if (hasFailure) ...[
-                const SizedBox(width: 8),
-                _FailureBadge(),
+            ),
+          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: const [AppTheme.cardShadow],
+            ),
+            child: Row(
+              children: [
+                _DateTile(label: label),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$setsCount set${setsCount == 1 ? '' : 's'} · $totalReps total reps',
+                        style: GoogleFonts.baloo2(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.text),
+                      ),
+                      Text(
+                        entry.sets.map((s) {
+                          final w =
+                              s.weight != null ? ' × ${s.weight}kg' : '';
+                          return '${s.reps}$w';
+                        }).join(', '),
+                        style: GoogleFonts.quicksand(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.muted),
+                        // Wraps to three lines so a typical session is fully
+                        // readable here; tapping through shows every set.
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                if (hasFailure) ...[
+                  const SizedBox(width: 8),
+                  _FailureBadge(),
+                ],
+                const SizedBox(width: 4),
+                const Icon(Icons.chevron_right,
+                    size: 20, color: AppColors.muted),
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -488,10 +536,16 @@ class _StrengthEntryRow extends ConsumerWidget {
 // ── Endurance entry row ────────────────────────────────────────────────────
 
 class _EnduranceEntryRow extends ConsumerWidget {
-  const _EnduranceEntryRow(
-      {required this.entry, required this.exerciseId});
+  const _EnduranceEntryRow({
+    required this.entry,
+    required this.exerciseId,
+    required this.exerciseName,
+    required this.bodyPart,
+  });
   final WorkoutEntry entry;
   final String exerciseId;
+  final String exerciseName;
+  final String bodyPart;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -511,44 +565,66 @@ class _EnduranceEntryRow extends ConsumerWidget {
         direction: DismissDirection.endToStart,
         background: _deleteBackground(),
         confirmDismiss: (_) => _confirmDelete(context),
-        onDismissed: (_) => ref
-            .read(workoutRepositoryProvider)
-            .deleteEntry(exerciseId, entry.id),
-        child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: const [AppTheme.cardShadow],
-          ),
-          child: Row(
-            children: [
-              _DateTile(label: label),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      formatDuration(duration),
-                      style: GoogleFonts.baloo2(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.text),
-                    ),
-                    if (details.isNotEmpty)
-                      Text(
-                        details,
-                        style: GoogleFonts.quicksand(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.muted),
-                      ),
-                  ],
-                ),
+        onDismissed: (_) {
+          final messenger = ScaffoldMessenger.of(context);
+          ref
+              .read(workoutRepositoryProvider)
+              .deleteEntry(exerciseId, entry.id)
+              .then((_) => AppSnack.showOn(messenger, 'Entry deleted'))
+              .catchError(
+                (_) => AppSnack.errorOn(messenger, "Couldn't delete that."),
+              );
+        },
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => AddEntryScreen(
+                exerciseId: exerciseId,
+                exerciseName: exerciseName,
+                bodyPart: bodyPart,
+                existing: entry,
               ),
-            ],
+            ),
+          ),
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: const [AppTheme.cardShadow],
+            ),
+            child: Row(
+              children: [
+                _DateTile(label: label),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        formatDuration(duration),
+                        style: GoogleFonts.baloo2(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.text),
+                      ),
+                      if (details.isNotEmpty)
+                        Text(
+                          details,
+                          style: GoogleFonts.quicksand(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.muted),
+                        ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right,
+                    size: 20, color: AppColors.muted),
+              ],
+            ),
           ),
         ),
       ),

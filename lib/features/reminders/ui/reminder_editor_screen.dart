@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/theme.dart';
+import '../../../core/widgets/app_snack.dart';
 import '../data/reminder.dart';
 import '../providers/reminder_providers.dart';
 
@@ -42,8 +43,14 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
         enabled: widget.reminder?.enabled ?? true,
       );
 
+  /// Unlike the Firestore-backed screens, this deliberately keeps its `await`:
+  /// reminders are stored in shared_preferences and the repository also arms up
+  /// to seven OS alarms per reminder. That work is local and quick, and the
+  /// alarms should be scheduled before the editor closes.
   Future<void> _save() async {
     if (_saving || !_hasDaySelected) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final wasEditing = _editing;
     setState(() => _saving = true);
     final repo = ref.read(reminderRepositoryProvider);
     try {
@@ -58,6 +65,12 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
         );
       }
       if (mounted) Navigator.of(context).pop();
+      AppSnack.showOn(
+        messenger,
+        wasEditing ? 'Reminder updated' : 'Reminder set',
+      );
+    } catch (_) {
+      AppSnack.errorOn(messenger, "Couldn't save that reminder.");
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -66,8 +79,14 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
   Future<void> _delete() async {
     final reminder = widget.reminder;
     if (reminder == null) return;
-    await ref.read(reminderRepositoryProvider).delete(reminder.id);
-    if (mounted) Navigator.of(context).pop();
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(reminderRepositoryProvider).delete(reminder.id);
+      if (mounted) Navigator.of(context).pop();
+      AppSnack.showOn(messenger, 'Reminder deleted');
+    } catch (_) {
+      AppSnack.errorOn(messenger, "Couldn't delete that reminder.");
+    }
   }
 
   @override
@@ -340,6 +359,9 @@ class _TimeColumn extends StatelessWidget {
 
   Future<void> _typeValue(BuildContext context) async {
     final controller = TextEditingController(text: value.toString());
+    // whenComplete fires however the dialog is dismissed — Set, Cancel, the
+    // back gesture, or a tap outside — and passes the result through, so the
+    // controller is always released exactly once.
     final entered = await showDialog<int>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -380,7 +402,7 @@ class _TimeColumn extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ).whenComplete(controller.dispose);
     if (entered != null) onChanged(entered.clamp(0, max - 1));
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/widgets/app_snack.dart';
 import '../../auth/data/auth_providers.dart';
 import '../../pairing/data/pairing_providers.dart';
 import '../data/user_profile.dart';
@@ -46,13 +47,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   labelText: 'Display name',
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.check),
-                    onPressed: () async {
+                    onPressed: () {
                       final name = _nameController.text.trim();
                       if (name.isEmpty) return;
-                      await ref
-                          .read(userRepositoryProvider)
-                          .updateDisplayName(profile.id, name);
+                      final messenger = ScaffoldMessenger.of(context);
+                      // Clear the dirty flag straight away: the write is
+                      // applied locally at once, and awaiting server ack left
+                      // the field looking unsaved on a slow connection.
                       setState(() => _nameDirty = false);
+                      ref
+                          .read(userRepositoryProvider)
+                          .updateDisplayName(profile.id, name)
+                          .then((_) =>
+                              AppSnack.showOn(messenger, 'Display name saved'))
+                          .catchError((_) {
+                        if (mounted) setState(() => _nameDirty = true);
+                        AppSnack.errorOn(
+                          messenger,
+                          "Couldn't save your display name.",
+                        );
+                      });
                     },
                   ),
                 ),

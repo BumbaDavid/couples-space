@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/theme.dart';
+import '../../../core/widgets/app_snack.dart';
 import '../data/exercise.dart';
 import '../data/workout_day.dart';
 import '../data/workout_icons.dart';
@@ -295,6 +296,29 @@ class _DaySection extends ConsumerWidget {
   final int globalTileOffset;
   final void Function(String dayId, String dayName) onPickExercises;
 
+  /// Closes the dialog first, then writes.
+  ///
+  /// Firestore applies the update to the local cache immediately, so the new
+  /// name is already on screen; the Future it returns only completes on server
+  /// acknowledgement. Awaiting that before popping left the dialog open on a
+  /// slow connection — the rename had worked, but it looked like it hadn't.
+  Future<void> _submitRename(
+    BuildContext ctx,
+    WidgetRef ref,
+    String rawName,
+  ) async {
+    final messenger = ScaffoldMessenger.of(ctx);
+    final name = rawName.trim();
+    Navigator.pop(ctx);
+    if (name.isEmpty || name == day.name) return;
+    try {
+      await ref.read(workoutRepositoryProvider).renameDay(day.id, name);
+      AppSnack.showOn(messenger, 'Day renamed to "$name"');
+    } catch (_) {
+      AppSnack.errorOn(messenger, "Couldn't rename that day.");
+    }
+  }
+
   void _showRename(BuildContext context, WidgetRef ref) {
     final controller = TextEditingController(text: day.name);
     showDialog(
@@ -335,13 +359,7 @@ class _DaySection extends ConsumerWidget {
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           ),
-          onSubmitted: (_) async {
-            final name = controller.text.trim();
-            if (name.isNotEmpty) {
-              await ref.read(workoutRepositoryProvider).renameDay(day.id, name);
-            }
-            if (ctx.mounted) Navigator.pop(ctx);
-          },
+          onSubmitted: (_) => _submitRename(ctx, ref, controller.text),
         ),
         actions: [
           TextButton(
@@ -356,15 +374,7 @@ class _DaySection extends ConsumerWidget {
             ),
           ),
           TextButton(
-            onPressed: () async {
-              final name = controller.text.trim();
-              if (name.isNotEmpty) {
-                await ref
-                    .read(workoutRepositoryProvider)
-                    .renameDay(day.id, name);
-              }
-              if (ctx.mounted) Navigator.pop(ctx);
-            },
+            onPressed: () => _submitRename(ctx, ref, controller.text),
             child: Text(
               'Rename',
               style: GoogleFonts.baloo2(
@@ -376,7 +386,9 @@ class _DaySection extends ConsumerWidget {
           ),
         ],
       ),
-    );
+      // showDialog's future resolves when the dialog closes, whichever way it
+      // was dismissed — the only place the controller can safely be released.
+    ).whenComplete(controller.dispose);
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref) {
@@ -413,10 +425,15 @@ class _DaySection extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () async {
+              final messenger = ScaffoldMessenger.of(ctx);
+              final deletedName = day.name;
               Navigator.pop(ctx);
-              await ref
-                  .read(workoutRepositoryProvider)
-                  .deleteDay(day.id);
+              try {
+                await ref.read(workoutRepositoryProvider).deleteDay(day.id);
+                AppSnack.showOn(messenger, '$deletedName deleted');
+              } catch (_) {
+                AppSnack.errorOn(messenger, "Couldn't delete that day.");
+              }
             },
             style:
                 TextButton.styleFrom(foregroundColor: AppColors.failText),
@@ -867,10 +884,17 @@ class _ExerciseRow extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () async {
+              final messenger = ScaffoldMessenger.of(ctx);
+              final deletedName = exercise.name;
               Navigator.pop(ctx);
-              await ref
-                  .read(workoutRepositoryProvider)
-                  .deleteExercise(exercise.id);
+              try {
+                await ref
+                    .read(workoutRepositoryProvider)
+                    .deleteExercise(exercise.id);
+                AppSnack.showOn(messenger, '$deletedName deleted');
+              } catch (_) {
+                AppSnack.errorOn(messenger, "Couldn't delete that exercise.");
+              }
             },
             style:
                 TextButton.styleFrom(foregroundColor: AppColors.failText),

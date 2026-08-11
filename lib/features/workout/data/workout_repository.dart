@@ -170,6 +170,29 @@ class WorkoutRepository {
         .set(dateTimesToTimestamps(json, _entryTimeFields));
   }
 
+  /// Overwrites a logged entry's measurements, leaving its `date` untouched —
+  /// editing a mistake shouldn't move the session to today.
+  ///
+  /// Endurance fields are written even when null so clearing a value actually
+  /// removes it; `update` ignores keys you omit, which would silently keep a
+  /// stale distance or speed.
+  Future<void> updateEntry({
+    required String exerciseId,
+    required String entryId,
+    List<WorkoutSet> sets = const [],
+    int? durationMinutes,
+    double? distanceKm,
+    double? speed,
+    int? resistance,
+  }) =>
+      _entries(exerciseId).doc(entryId).update({
+        'sets': sets.map((s) => s.toJson()).toList(),
+        'durationMinutes': durationMinutes,
+        'distanceKm': distanceKm,
+        'speed': speed,
+        'resistance': resistance,
+      });
+
   Future<void> deleteEntry(String exerciseId, String entryId) =>
       _entries(exerciseId).doc(entryId).delete();
 

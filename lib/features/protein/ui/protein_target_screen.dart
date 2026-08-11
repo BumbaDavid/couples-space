@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/theme.dart';
+import '../../../core/widgets/app_snack.dart';
 import '../data/protein_repository.dart';
 import '../providers/protein_providers.dart';
 import 'widgets/protein_common.dart';
@@ -21,29 +22,26 @@ class _ProteinTargetScreenState extends ConsumerState<ProteinTargetScreen> {
   int? _target;
   bool _saving = false;
 
-  Future<void> _save() async {
+  /// Pops first: `setTarget` lands in the local cache immediately, so the ring
+  /// already reflects the new target, but its Future waits on server ack.
+  void _save() {
     if (_saving) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final int target = _target ?? ref.read(proteinTargetProvider);
+    final repo = ref.read(proteinRepositoryProvider);
+
     setState(() => _saving = true);
-    try {
-      await ref
-          .read(proteinRepositoryProvider)
-          .setTarget(_target ?? ref.read(proteinTargetProvider));
-      if (mounted) Navigator.of(context).pop();
-    } on ProteinException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              e.message,
-              style: GoogleFonts.quicksand(fontWeight: FontWeight.w700),
-            ),
-            backgroundColor: AppColors.text,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
+    Navigator.of(context).pop();
+
+    repo
+        .setTarget(target)
+        .then((_) => AppSnack.showOn(messenger, 'Target set to ${target}g'))
+        .catchError((Object e) {
+      AppSnack.errorOn(
+        messenger,
+        e is ProteinException ? e.message : 'Could not save your target.',
+      );
+    });
   }
 
   @override

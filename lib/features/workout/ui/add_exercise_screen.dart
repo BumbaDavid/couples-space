@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/theme.dart';
+import '../../../core/widgets/app_snack.dart';
 import '../data/workout_icons.dart';
 import '../providers/workout_providers.dart';
 
@@ -25,20 +26,31 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
     super.dispose();
   }
 
-  Future<void> _create() async {
+  /// Leaves the screen immediately, then writes.
+  ///
+  /// `createExercise` is a Firestore write: it hits the local cache at once (so
+  /// the new exercise is already in the list) but its Future only completes on
+  /// server acknowledgement. Awaiting that before popping left the button
+  /// spinning on a slow connection for a write that had already taken effect.
+  void _create() {
     if (_saving) return;
-    setState(() => _saving = true);
+    final messenger = ScaffoldMessenger.of(context);
     final name = _nameController.text.trim().isEmpty
         ? 'New Exercise'
         : _nameController.text.trim();
-    try {
-      await ref
-          .read(workoutRepositoryProvider)
-          .createExercise(name: name, bodyPart: _bodyPart, dayId: widget.dayId);
-      if (mounted) Navigator.of(context).pop();
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
+    final bodyPart = _bodyPart;
+    final dayId = widget.dayId;
+    final repo = ref.read(workoutRepositoryProvider);
+
+    setState(() => _saving = true);
+    Navigator.of(context).pop();
+
+    repo
+        .createExercise(name: name, bodyPart: bodyPart, dayId: dayId)
+        .then((_) => AppSnack.showOn(messenger, '$name added'))
+        .catchError(
+          (_) => AppSnack.errorOn(messenger, "Couldn't add that exercise."),
+        );
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/theme.dart';
+import '../../../core/widgets/app_snack.dart';
 import '../data/protein_date_utils.dart';
 import '../data/protein_entry.dart';
 import '../data/protein_icons.dart';
@@ -38,40 +39,42 @@ class _EditEntryScreenState extends ConsumerState<EditEntryScreen> {
     _slot = widget.entry.slot;
   }
 
-  Future<void> _save() async {
+  /// Pops first — the edit is applied to the local cache at once, so the row
+  /// already shows its new value; the Future only waits on server ack.
+  void _save() {
     if (_saving) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final updated =
+        widget.entry.copyWith(unit: _unit, count: _count, slot: _slot);
+    final repo = ref.read(proteinRepositoryProvider);
+
     setState(() => _saving = true);
-    try {
-      await ref.read(proteinRepositoryProvider).updateEntry(
-            widget.entry.copyWith(unit: _unit, count: _count, slot: _slot),
-          );
-      if (mounted) Navigator.of(context).pop();
-    } on ProteinException catch (e) {
-      _showMessage(e.message);
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
+    Navigator.of(context).pop();
+
+    repo
+        .updateEntry(updated)
+        .then((_) => AppSnack.showOn(messenger, 'Updated'))
+        .catchError((Object e) => _reportError(messenger, e));
   }
 
-  Future<void> _remove() async {
-    try {
-      await ref.read(proteinRepositoryProvider).deleteEntry(widget.entry.id);
-      if (mounted) Navigator.of(context).pop();
-    } on ProteinException catch (e) {
-      _showMessage(e.message);
-    }
+  void _remove() {
+    final messenger = ScaffoldMessenger.of(context);
+    final name = widget.entry.name;
+    final repo = ref.read(proteinRepositoryProvider);
+    final id = widget.entry.id;
+
+    Navigator.of(context).pop();
+
+    repo
+        .deleteEntry(id)
+        .then((_) => AppSnack.showOn(messenger, '$name taken off the list'))
+        .catchError((Object e) => _reportError(messenger, e));
   }
 
-  void _showMessage(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: GoogleFonts.quicksand(fontWeight: FontWeight.w700),
-        ),
-        backgroundColor: AppColors.text,
-      ),
+  void _reportError(ScaffoldMessengerState messenger, Object e) {
+    AppSnack.errorOn(
+      messenger,
+      e is ProteinException ? e.message : 'Could not save that change.',
     );
   }
 

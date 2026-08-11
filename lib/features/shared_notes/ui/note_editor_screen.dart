@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/widgets/app_snack.dart';
 import '../data/note.dart';
 import 'note_editor_scope.dart';
 
@@ -34,22 +35,36 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     super.dispose();
   }
 
-  Future<bool> _saveAndExit() async {
+  /// Fires the auto-save without being awaited by the caller.
+  ///
+  /// Every branch here is a Firestore write, which lands in the local cache
+  /// immediately but only completes its Future on server acknowledgement.
+  /// Awaiting it before popping meant the back gesture did nothing visible
+  /// until the network replied — on a bad connection, seemingly not at all.
+  /// Text is captured up-front because the controllers are disposed as soon as
+  /// this screen pops.
+  void _startSave(ScaffoldMessengerState messenger) {
     final title = _titleController.text.trim();
     final body = _bodyController.text.trim();
-    if (title.isEmpty && body.isEmpty) {
-      if (_persistedId != null) {
-        await widget.scope.delete(noteId: _persistedId!, ref: ref);
+    final id = _persistedId;
+    final scope = widget.scope;
+
+    Future<void> run() async {
+      if (title.isEmpty && body.isEmpty) {
+        // An empty note is discarded rather than saved.
+        if (id != null) await scope.delete(noteId: id, ref: ref);
+        return;
       }
-      return true;
+      if (id == null) {
+        await scope.create(title: title, body: body, ref: ref);
+      } else {
+        await scope.update(noteId: id, title: title, body: body, ref: ref);
+      }
     }
-    if (_persistedId == null) {
-      await widget.scope.create(title: title, body: body, ref: ref);
-    } else {
-      await widget.scope
-          .update(noteId: _persistedId!, title: title, body: body, ref: ref);
-    }
-    return true;
+
+    run().catchError((_) {
+      AppSnack.errorOn(messenger, "Couldn't save that note.");
+    });
   }
 
   Future<void> _confirmDelete() async {
@@ -74,9 +89,18 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         ],
       ),
     );
-    if (confirmed ?? false) {
-      await widget.scope.delete(noteId: _persistedId!, ref: ref);
-      if (mounted) nav.pop();
+    if ((confirmed ?? false) && mounted) {
+      final messenger = ScaffoldMessenger.of(context);
+      final id = _persistedId!;
+      final scope = widget.scope;
+      // Leave first; the delete is applied locally at once.
+      nav.pop();
+      try {
+        await scope.delete(noteId: id, ref: ref);
+        AppSnack.showOn(messenger, 'Note deleted');
+      } catch (_) {
+        AppSnack.errorOn(messenger, "Couldn't delete that note.");
+      }
     }
   }
 
@@ -84,11 +108,12 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, _) async {
+      onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
-        final nav = Navigator.of(context);
-        await _saveAndExit();
-        if (mounted) nav.pop();
+        // Pop immediately and let the save run in the background — the note
+        // list updates from the local cache, so waiting buys nothing.
+        _startSave(ScaffoldMessenger.of(context));
+        Navigator.of(context).pop();
       },
       child: Scaffold(
         appBar: AppBar(

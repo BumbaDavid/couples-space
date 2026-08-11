@@ -155,6 +155,21 @@ Specifically:
   at the screen boundary.
 - **Auto-save:** the note editor auto-saves on back-navigation. If both title and body
   are empty, the note is discarded instead of saved.
+- **Never await a Firestore write before navigating or closing a dialog.** Firestore
+  applies writes to the local cache immediately — the UI updates from the snapshot
+  listener right away — but the returned `Future` only completes when the **server
+  acknowledges**. Awaiting it before `Navigator.pop` leaves the screen or dialog stuck on
+  a slow connection, for a change that has already taken effect. Instead: capture any
+  controller text and the `ScaffoldMessenger` **first**, pop, *then* fire the write and
+  report via `.then` / `.catchError`. (Local repositories are exempt — `ReminderRepository`
+  is `shared_preferences` plus OS alarm scheduling, so awaiting it is correct.)
+- **Confirmation toasts:** use `AppSnack` (`core/widgets/app_snack.dart`) for mutations
+  whose outcome isn't already visible — **deletes, renames, and saves that navigate
+  away**. Stay silent when the result is self-evident on screen (a logged protein row
+  appears instantly and has its own undo toast; a toast on top is noise). `AppSnack.show`
+  / `.error` take a context; `AppSnack.showOn` / `.errorOn` take a `ScaffoldMessengerState`
+  captured before popping. Errors are **not red** — same dark surface, different icon —
+  because the protein feature forbids red and one visual language beats a special case.
 - **Deletes are hard deletes** with a confirmation dialog. No soft-delete, no undo in V1.
 - **Colors and shadows:** never use raw hex values in UI code. Use `AppColors.*` for
   colors, `AppTheme.cardShadow` / `AppTheme.buttonShadow` for shadows, and
@@ -178,6 +193,36 @@ Specifically:
 - **Obsidian vault:** Before adding anything to `docs/vault/`, ask first.
 - **Git:** Never commit or push to GitHub unless explicitly asked. Fetching and pulling
   to compare is fine.
+
+### Always start here — two tools that are easy to forget
+
+These are not suggestions. Both were available and under-used during the protein
+tracker build, which cost tokens and round-trips for no benefit.
+
+- **Codegraph before Read/Grep, for anything about code.** This repo has a live
+  codegraph index (`.codegraph/`, daemon auto-runs). For *any* question about how code
+  works, where a symbol lives, what an area does, or what a change will affect, call
+  `codegraph_explore` **first**. One call returns the verbatim line-numbered source
+  grouped by file — treat it as a Read already performed, and do **not** re-Read those
+  files — plus the call path and a blast-radius list of dependents. Reach for `Read` /
+  `Grep` only for a file codegraph doesn't cover (docs, YAML, Gradle, rules) or when a
+  specific line range is already known. Before editing a symbol, explore it first so
+  its callers are visible.
+
+- **The vault is the source of truth for decisions and "why".** Before answering
+  anything about architecture, a past decision, a trade-off, scope, or why something is
+  shaped the way it is, read `docs/vault/` — `Home.md` is the index, `decisions/` holds
+  the ADRs, `ideas/` holds feature rationale, `guides/` holds setup docs. **Do not
+  reconstruct the "why" from code or git history when an ADR states it.** The code shows
+  what happens; the vault records what was ruled out and what must never be changed
+  (e.g. the private protein log, self-only `users/{userId}` writes). When a decision is
+  made or reversed in conversation, say so and offer to update the relevant vault note —
+  after asking, per the rule above.
+
+  The vault is plain markdown, so ordinary file tools work. If the Obsidian MCP server
+  is connected it additionally gives backlinks, tag listing, and section-targeted reads
+  and patches — see [docs/vault/guides/obsidian-mcp-setup.md](docs/vault/guides/obsidian-mcp-setup.md).
+  It requires Obsidian to be running, so plain file reads are the reliable fallback.
 
 ## Things deferred to post-V1 — do not add them speculatively
 

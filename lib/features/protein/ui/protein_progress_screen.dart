@@ -156,8 +156,15 @@ class _ProteinProgressScreenState extends ConsumerState<ProteinProgressScreen> {
         children: [
           const Eyebrow('Each day'),
           const SizedBox(height: 14),
+          // The plot area and the day labels are deliberately two separate
+          // rows. Previously the labels lived inside each bar's Column, and a
+          // logged day's content (value text + full-height bar + label)
+          // exceeded the fixed height. RenderFlex clamps leftover space to
+          // zero on overflow, which makes MainAxisAlignment.end lay out from
+          // the top instead — dropping that one label below the others. Keeping
+          // labels in their own row makes alignment structural.
           SizedBox(
-            height: 132,
+            height: _plotHeight,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -168,47 +175,72 @@ class _ProteinProgressScreenState extends ConsumerState<ProteinProgressScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              for (var i = 0; i < stats.days.length; i++) ...[
+                Expanded(
+                  child: Text(
+                    stats.days[i].label,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.muted,
+                    ),
+                  ),
+                ),
+                if (i != stats.days.length - 1) const SizedBox(width: 9),
+              ],
+            ],
+          ),
         ],
       ),
     );
   }
 
+  /// Tallest bar, plus room above it for the value label.
+  static const double _maxBarHeight = 100;
+  static const double _valueLineHeight = 16;
+  static const double _plotHeight = _maxBarHeight + 4 + _valueLineHeight;
+
+  /// One bar, bottom-aligned in the plot area. Day labels are drawn by the
+  /// caller in a separate row, so nothing here can shift them.
+  ///
   /// An unlogged day draws a flat neutral stub rather than a zero-height gap,
   /// so a day without an entry reads as "nothing recorded", not as a hole.
   Widget _bar(DayTotal day, int maxGrams) {
-    const chartHeight = 100.0;
-    final height = day.logged ? (day.grams / maxGrams) * chartHeight : 0.0;
+    final height = day.logged
+        ? ((day.grams / maxGrams) * _maxBarHeight).clamp(6.0, _maxBarHeight)
+        : 6.0;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (day.logged)
-          Text(
-            '${day.grams}',
+        // Always rendered — an empty string on unlogged days — so every column
+        // reserves the same space above its bar and the total can't exceed the
+        // plot height.
+        SizedBox(
+          height: _valueLineHeight,
+          child: Text(
+            day.logged ? '${day.grams}' : '',
+            textAlign: TextAlign.center,
             style: GoogleFonts.quicksand(
               fontSize: 11,
               fontWeight: FontWeight.w800,
               color: AppColors.muted,
             ),
           ),
+        ),
         const SizedBox(height: 4),
         Container(
-          height: day.logged ? height.clamp(6.0, chartHeight) : 6,
+          height: height,
           decoration: BoxDecoration(
             color: day.logged ? AppColors.primary : AppColors.border,
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(8),
               bottom: Radius.circular(5),
             ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          day.label,
-          style: GoogleFonts.quicksand(
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            color: AppColors.muted,
           ),
         ),
       ],

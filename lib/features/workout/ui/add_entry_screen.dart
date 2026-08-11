@@ -4,21 +4,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/theme.dart';
+import '../../../core/widgets/app_snack.dart';
 import '../data/workout_entry.dart';
 import '../data/workout_icons.dart';
 import '../data/workout_set.dart';
 import '../providers/workout_providers.dart';
 
+/// Logs a new entry, or edits an existing one when [existing] is supplied.
+///
+/// Doubles as the editor rather than duplicating the set-list UI in a second
+/// screen — same approach as `FoodCardFormScreen` with its optional card.
 class AddEntryScreen extends ConsumerStatefulWidget {
   const AddEntryScreen({
     super.key,
     required this.exerciseId,
     required this.exerciseName,
     required this.bodyPart,
+    this.existing,
   });
   final String exerciseId;
   final String exerciseName;
   final String bodyPart;
+
+  /// When non-null this screen edits that entry instead of creating one.
+  final WorkoutEntry? existing;
 
   @override
   ConsumerState<AddEntryScreen> createState() => _AddEntryScreenState();
@@ -42,6 +51,24 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   bool _saving = false;
 
   bool get _isEndurance => WorkoutIcons.isEndurance(widget.bodyPart);
+  bool get _isEditing => widget.existing != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existing;
+    if (existing == null) return;
+    // Prefill from the entry being edited.
+    _sets.addAll(existing.sets);
+    _durationMinutes = existing.durationMinutes ?? 20;
+    if (existing.distanceKm != null) {
+      _distanceController.text = '${existing.distanceKm}';
+    }
+    if (existing.speed != null) _speedController.text = '${existing.speed}';
+    if (existing.resistance != null) {
+      _resistanceController.text = '${existing.resistance}';
+    }
+  }
 
   @override
   void dispose() {
@@ -51,6 +78,8 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     _resistanceController.dispose();
     super.dispose();
   }
+
+  void _removeSet(int index) => setState(() => _sets.removeAt(index));
 
   void _addSet() {
     final weight = _weightController.text.trim().isEmpty
@@ -64,39 +93,145 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     });
   }
 
-  Future<void> _saveStrength() async {
+  /// Pops first, then writes — `createEntry` reaches the local cache instantly
+  /// but its Future waits on server acknowledgement, which used to keep this
+  /// screen open for a save that had already landed.
+  void _saveStrength() {
     if (_saving || _sets.isEmpty) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final sets = List<WorkoutSet>.from(_sets);
+    final repo = ref.read(workoutRepositoryProvider);
+
+    final existing = widget.existing;
     setState(() => _saving = true);
-    try {
-      await ref.read(workoutRepositoryProvider).createEntry(
+    Navigator.of(context).pop();
+
+    final write = existing == null
+        ? repo.createEntry(exerciseId: widget.exerciseId, sets: sets)
+        : repo.updateEntry(
             exerciseId: widget.exerciseId,
-            sets: _sets,
+            entryId: existing.id,
+            sets: sets,
           );
-      if (mounted) Navigator.of(context).pop();
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
+
+    write
+        .then((_) => AppSnack.showOn(
+              messenger,
+              existing == null ? 'Set logged' : 'Entry updated',
+            ))
+        .catchError(
+          (_) => AppSnack.errorOn(messenger, "Couldn't save that."),
+        );
   }
 
-  Future<void> _saveEndurance() async {
+  void _saveEndurance() {
     if (_saving) return;
+    double? parseDouble(String t) =>
+        t.trim().isEmpty ? null : double.tryParse(t.trim());
+    int? parseInt(String t) =>
+        t.trim().isEmpty ? null : int.tryParse(t.trim());
+
+    final messenger = ScaffoldMessenger.of(context);
+    // Read the controllers before popping — they're disposed on the way out.
+    final duration = _durationMinutes;
+    final distance = parseDouble(_distanceController.text);
+    final speed = parseDouble(_speedController.text);
+    final resistance = parseInt(_resistanceController.text);
+    final repo = ref.read(workoutRepositoryProvider);
+    final existing = widget.existing;
+
     setState(() => _saving = true);
-    try {
-      double? parseDouble(String t) =>
-          t.trim().isEmpty ? null : double.tryParse(t.trim());
-      int? parseInt(String t) =>
-          t.trim().isEmpty ? null : int.tryParse(t.trim());
-      await ref.read(workoutRepositoryProvider).createEntry(
+    Navigator.of(context).pop();
+
+    final write = existing == null
+        ? repo.createEntry(
             exerciseId: widget.exerciseId,
-            durationMinutes: _durationMinutes,
-            distanceKm: parseDouble(_distanceController.text),
-            speed: parseDouble(_speedController.text),
-            resistance: parseInt(_resistanceController.text),
+            durationMinutes: duration,
+            distanceKm: distance,
+            speed: speed,
+            resistance: resistance,
+          )
+        : repo.updateEntry(
+            exerciseId: widget.exerciseId,
+            entryId: existing.id,
+            durationMinutes: duration,
+            distanceKm: distance,
+            speed: speed,
+            resistance: resistance,
           );
-      if (mounted) Navigator.of(context).pop();
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
+
+    write
+        .then((_) => AppSnack.showOn(
+              messenger,
+              existing == null ? 'Session logged' : 'Entry updated',
+            ))
+        .catchError(
+          (_) => AppSnack.errorOn(messenger, "Couldn't save that."),
+        );
+  }
+
+  Future<void> _deleteEntry() async {
+    final existing = widget.existing;
+    if (existing == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+        title: Text(
+          'Delete this entry?',
+          style: GoogleFonts.baloo2(
+            fontSize: 19,
+            fontWeight: FontWeight.w600,
+            color: AppColors.text,
+          ),
+        ),
+        content: Text(
+          'It will be removed from your history.',
+          style: GoogleFonts.quicksand(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.muted,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.baloo2(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.muted,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              'Delete',
+              style: GoogleFonts.baloo2(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.failText,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final repo = ref.read(workoutRepositoryProvider);
+    Navigator.of(context).pop();
+
+    repo
+        .deleteEntry(widget.exerciseId, existing.id)
+        .then((_) => AppSnack.showOn(messenger, 'Entry deleted'))
+        .catchError(
+          (_) => AppSnack.errorOn(messenger, "Couldn't delete that."),
+        );
   }
 
   @override
@@ -107,12 +242,32 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           children: [
             Column(
               children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: AppColors.text),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon:
+                          const Icon(Icons.arrow_back, color: AppColors.text),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    if (_isEditing)
+                      TextButton.icon(
+                        onPressed: _deleteEntry,
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          size: 19,
+                          color: AppColors.failText,
+                        ),
+                        label: Text(
+                          'Delete',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.failText,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 Expanded(
                   child: SingleChildScrollView(
@@ -131,7 +286,13 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _isEndurance ? 'Log a session' : 'Log a set',
+                          _isEditing
+                              ? (_isEndurance
+                                  ? 'Edit session'
+                                  : 'Edit sets')
+                              : (_isEndurance
+                                  ? 'Log a session'
+                                  : 'Log a set'),
                           style: GoogleFonts.baloo2(
                             fontSize: 28,
                             fontWeight: FontWeight.w600,
@@ -177,7 +338,11 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
           const SizedBox(height: 8),
           ..._sets.asMap().entries.map((e) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: _SetChip(index: e.key, set: e.value),
+                child: _SetChip(
+                  index: e.key,
+                  set: e.value,
+                  onRemove: () => _removeSet(e.key),
+                ),
               )),
           const SizedBox(height: 16),
         ],
@@ -299,15 +464,20 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
 // ── Set chip ───────────────────────────────────────────────────────────────
 
 class _SetChip extends StatelessWidget {
-  const _SetChip({required this.index, required this.set});
+  const _SetChip({
+    required this.index,
+    required this.set,
+    required this.onRemove,
+  });
   final int index;
   final WorkoutSet set;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
     final weightStr = set.weight != null ? ' × ${set.weight}kg' : '';
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.fromLTRB(14, 6, 6, 6),
       decoration: BoxDecoration(
         color: AppColors.chipBg,
         borderRadius: BorderRadius.circular(18),
@@ -322,18 +492,31 @@ class _SetChip extends StatelessWidget {
                 color: AppColors.muted),
           ),
           const SizedBox(width: 12),
-          Text(
-            '${set.reps} reps$weightStr',
-            style: GoogleFonts.baloo2(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: AppColors.text),
+          Expanded(
+            child: Text(
+              '${set.reps} reps$weightStr',
+              style: GoogleFonts.baloo2(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.text),
+            ),
           ),
-          if (set.failure) ...[
-            const Spacer(),
-            const Icon(Icons.local_fire_department,
-                size: 16, color: AppColors.failText),
-          ],
+          if (set.failure)
+            const Padding(
+              padding: EdgeInsets.only(right: 4),
+              child: Icon(Icons.local_fire_department,
+                  size: 16, color: AppColors.failText),
+            ),
+          // Per-set removal: a mistyped set can be dropped and re-added
+          // without discarding the whole entry.
+          IconButton(
+            icon: const Icon(Icons.close, size: 18, color: AppColors.muted),
+            onPressed: onRemove,
+            visualDensity: VisualDensity.compact,
+            constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+            padding: EdgeInsets.zero,
+            tooltip: 'Remove set ${index + 1}',
+          ),
         ],
       ),
     );

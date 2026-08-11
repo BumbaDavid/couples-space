@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/theme.dart';
+import '../../../core/widgets/app_snack.dart';
 import '../data/food_card.dart';
 import '../data/protein_icons.dart';
 import '../data/protein_repository.dart';
@@ -43,39 +44,50 @@ class _FoodCardFormScreenState extends ConsumerState<FoodCardFormScreen> {
     super.dispose();
   }
 
-  Future<void> _save() async {
+  /// Pops first — the card write reaches the local cache immediately, so the
+  /// catalog already shows it; the Future only waits on server ack.
+  void _save() {
     if (_saving) return;
     final coupleId = ref.read(proteinCoupleIdProvider);
     if (coupleId == null) {
-      _showMessage('Pair with your partner first to share food cards.');
+      AppSnack.error(context, 'Pair with your partner first to share food cards.');
       return;
     }
-    setState(() => _saving = true);
+    final messenger = ScaffoldMessenger.of(context);
+    // Read the field before popping — the controller is disposed on the way out.
+    final name = _name.text.trim().isEmpty ? 'New food' : _name.text.trim();
+    final grams = _grams;
+    final icon = _icon;
+    final editing = _isEditing;
+    final existing = widget.card;
     final repo = ref.read(proteinRepositoryProvider);
-    try {
-      if (_isEditing) {
-        await repo.updateFood(
-          coupleId,
-          widget.card!.copyWith(
-            name: _name.text,
-            proteinGrams: _grams,
-            icon: _icon,
-          ),
-        );
-      } else {
-        await repo.createFood(
-          coupleId,
-          name: _name.text,
-          proteinGrams: _grams,
-          icon: _icon,
-        );
-      }
-      if (mounted) Navigator.of(context).pop();
-    } on ProteinException catch (e) {
-      _showMessage(e.message);
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
+
+    setState(() => _saving = true);
+    Navigator.of(context).pop();
+
+    final write = editing
+        ? repo.updateFood(
+            coupleId,
+            existing!.copyWith(name: name, proteinGrams: grams, icon: icon),
+          )
+        : repo.createFood(
+            coupleId,
+            name: name,
+            proteinGrams: grams,
+            icon: icon,
+          );
+
+    write
+        .then((_) => AppSnack.showOn(
+              messenger,
+              editing ? '$name updated' : '$name added',
+            ))
+        .catchError((Object e) {
+      AppSnack.errorOn(
+        messenger,
+        e is ProteinException ? e.message : 'Could not save that card.',
+      );
+    });
   }
 
   Future<void> _delete() async {
@@ -128,28 +140,23 @@ class _FoodCardFormScreenState extends ConsumerState<FoodCardFormScreen> {
         ],
       ),
     );
-    if (confirmed != true) return;
-    try {
-      await ref
-          .read(proteinRepositoryProvider)
-          .deleteFood(coupleId, widget.card!.id);
-      if (mounted) Navigator.of(context).pop();
-    } on ProteinException catch (e) {
-      _showMessage(e.message);
-    }
-  }
+    if (confirmed != true || !mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final name = widget.card!.name;
+    final id = widget.card!.id;
+    final repo = ref.read(proteinRepositoryProvider);
 
-  void _showMessage(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: GoogleFonts.quicksand(fontWeight: FontWeight.w700),
-        ),
-        backgroundColor: AppColors.text,
-      ),
-    );
+    Navigator.of(context).pop();
+
+    repo
+        .deleteFood(coupleId, id)
+        .then((_) => AppSnack.showOn(messenger, '$name removed'))
+        .catchError((Object e) {
+      AppSnack.errorOn(
+        messenger,
+        e is ProteinException ? e.message : 'Could not remove that card.',
+      );
+    });
   }
 
   @override
